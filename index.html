@@ -7,10 +7,7 @@
     <!-- Bibliotecas para processamento de dados e relatórios -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Bibliotecas para gerar PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
-
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -90,7 +87,7 @@
             padding-top: 2rem;
         }
 
-        #reload-files-btn, #generate-report-btn, #export-data-btn {
+        #reload-files-btn, #export-data-btn {
             padding: 0.75rem 1.5rem;
             font-size: 1em;
             font-weight: 600;
@@ -106,13 +103,6 @@
         
         #reload-files-btn { color: var(--primary-color); }
         #reload-files-btn:hover { background-color: var(--primary-light); border-color: var(--primary-color); }
-
-        #generate-report-btn { 
-            color: #fff;
-            background-color: var(--error-color);
-            border-color: var(--error-color);
-        }
-        #generate-report-btn:hover { opacity: 0.85; }
 
         #export-data-btn {
             color: #fff;
@@ -466,6 +456,7 @@
         }
         .modal-body { overflow-y: auto; }
         .text-right { text-align: right; }
+
     </style>
 </head>
 <body>
@@ -578,10 +569,6 @@
                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Exportar Dados para Partilha
             </button>
-            <button id="generate-report-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-8h-2v8h2zM16 18v-6h-2v6h2zM8 18v-4H6v4h2z"/></svg>
-                Gerar Relatório em PDF
-            </button>
         </div>
     </div>
 
@@ -625,7 +612,6 @@
                     switchToSector: document.getElementById('switchToSector'),
                     switchToProduct: document.getElementById('switchToProduct'),
                     reloadFiles: document.getElementById('reload-files-btn'),
-                    generateReport: document.getElementById('generate-report-btn'),
                     exportData: document.getElementById('export-data-btn')
                 },
                 inputs: {
@@ -1367,16 +1353,19 @@
             }
 
             function loadDataFromSharedObject(sharedData, isReadOnly = false) {
+                if (sharedData.ordersData) {
+                    localStorage.setItem('ordersData', JSON.stringify(sharedData.ordersData));
+                }
+                if (sharedData.nonReturnedOrders) {
+                    localStorage.setItem('nonReturnedOrders', JSON.stringify(sharedData.nonReturnedOrders));
+                }
                 if (sharedData.sectorData) {
-                    appState.sectorData = sharedData.sectorData;
                     localStorage.setItem('sectorData', JSON.stringify(sharedData.sectorData));
                 }
                 if (sharedData.addressData) {
-                    appState.addressData = new Map(sharedData.addressData);
                     localStorage.setItem('addressData', JSON.stringify(sharedData.addressData));
                 }
                 if (sharedData.productMasterData) {
-                    appState.productMasterData = new Map(sharedData.productMasterData);
                     localStorage.setItem('productMasterData', JSON.stringify(sharedData.productMasterData));
                 }
                 if (sharedData.lastUpdateTime) {
@@ -1385,9 +1374,6 @@
 
                 if (isReadOnly) {
                     UIElements.fileControl.panel.classList.add('hidden');
-                    UIElements.buttons.switchToValidation.classList.add('hidden');
-                    // Force view to sector analysis
-                    UIElements.buttons.switchToSector.click();
                 }
 
                 loadDataFromStorage();
@@ -1448,9 +1434,9 @@
                 UIElements.inputs.sharedFile.addEventListener('change', handleSharedFile);
                 
                 UIElements.buttons.reloadFiles.addEventListener('click', () => {
+                    // Limpa o localStorage e recarrega a página
                     Object.keys(localStorage).forEach(key => localStorage.removeItem(key));
-                    showNotification('Dados guardados foram limpos. A reiniciar...', 'warning');
-                    setTimeout(() => location.reload(), 1500);
+                    window.location.href = window.location.href.split('?')[0];
                 });
 
                 document.body.addEventListener('click', e => {
@@ -1480,6 +1466,8 @@
 
                 UIElements.buttons.exportData.addEventListener('click', () => {
                     const dataToShare = {
+                        ordersData: appState.ordersData,
+                        nonReturnedOrders: Array.from(appState.nonReturnedOrders),
                         sectorData: appState.sectorData,
                         addressData: Array.from(appState.addressData.entries()),
                         productMasterData: Array.from(appState.productMasterData.entries()),
@@ -1493,140 +1481,9 @@
                     link.download = 'relatorio-partilhado.json';
                     link.click();
                     URL.revokeObjectURL(url);
-                    showNotification('Ficheiro de partilha exportado!', 'success');
+                    showNotification('Ficheiro de partilha (.json) descarregado!', 'success');
                 });
-                
-                // ############# INÍCIO DO CÓDIGO CORRIGIDO #############
-                UIElements.buttons.generateReport.addEventListener('click', () => {
-                    try {
-                        const { sectorAnalysis, productAnalysis } = appState.processedData;
-                        if (!sectorAnalysis || !productAnalysis) {
-                            showNotification('Dados insuficientes para gerar relatório.', 'error');
-                            return;
-                        }
-                        
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-                        if (typeof doc.autoTable !== 'function') {
-                            console.error('jsPDF-AutoTable não foi carregado corretamente no objeto jsPDF.');
-                            showNotification('Erro ao carregar a biblioteca de PDF (AutoTable).', 'error');
-                            return;
-                        }
-
-                        showNotification('A gerar relatório em PDF...', 'warning', 4000);
-                        
-                        const reportDate = new Date(localStorage.getItem('lastUpdateTime') || Date.now()).toLocaleString('pt-BR');
-                        let finalY = 20;
-
-                        doc.setFontSize(18);
-                        doc.text('Relatório de Análise WMS', 105, finalY, { align: 'center' });
-                        finalY += 8;
-                        doc.setFontSize(10);
-                        doc.text(`Gerado em: ${reportDate}`, 105, finalY, { align: 'center' });
-                        finalY += 15;
-
-                        // 1. Resumo Geral
-                        doc.setFontSize(14);
-                        doc.text('Resumo Geral', 14, finalY);
-                        finalY += 8;
-                        doc.autoTable({
-                            startY: finalY,
-                            head: [['Indicador', 'Valor']],
-                            body: [
-                                ['Quantidade Total de Unidades', formatNumber(sectorAnalysis.totalQuantidadeGeral)],
-                                ['Total de SKUs Analisados', formatNumber(sectorAnalysis.totalSkusGeral)],
-                                ['Total de Filiais com Faturamento', formatNumber(sectorAnalysis.totalUniqueFiliais)],
-                                ['Total de Filiais Sem Faturamento', formatNumber(sectorAnalysis.filiaisSemFaturamento.length)]
-                            ],
-                            theme: 'striped',
-                            headStyles: { fillColor: [41, 128, 185] }
-                        });
-                        finalY = doc.lastAutoTable.finalY + 15;
-
-                        // 2. Análise por Setor
-                        if (finalY > 250) { doc.addPage(); finalY = 20; }
-                        doc.setFontSize(14);
-                        doc.text('Análise por Setor', 14, finalY);
-                        finalY += 8;
-                        const sectorBody = [...sectorAnalysis.setoresData.entries()]
-                            .sort((a,b) => getOrder(a[0]) - getOrder(b[0]) || a[0].localeCompare(b[0]))
-                            .map(([setor, data]) => [
-                                setor,
-                                formatNumber(data.totalQtd),
-                                formatNumber(data.products.size),
-                                `${(sectorAnalysis.totalQuantidadeGeral > 0 ? (data.totalQtd / sectorAnalysis.totalQuantidadeGeral) * 100 : 0).toFixed(1)}%`
-                            ]);
-                        
-                        doc.autoTable({
-                            startY: finalY,
-                            head: [['Setor', 'Unidades', 'SKUs', '% Total']],
-                            body: sectorBody,
-                            theme: 'grid',
-                            headStyles: { fillColor: [111, 66, 193] }
-                        });
-                        finalY = doc.lastAutoTable.finalY + 15;
-
-                        // 3. Faturamento por Filiais
-                        doc.addPage();
-                        finalY = 20;
-                        doc.setFontSize(14);
-                        doc.text('Faturamento por Filial (por Rota)', 14, finalY);
-                        finalY += 8;
-
-                        const sortedRotas = [...sectorAnalysis.filialData.keys()].sort((a, b) => Number(a) - Number(b));
-                        sortedRotas.forEach(rota => {
-                            const filiaisDaRota = sectorAnalysis.filialData.get(rota);
-                            if (!filiaisDaRota) return;
-
-                            const sortedFiliais = [...filiaisDaRota.entries()].sort((a,b) => b[1] - a[1]);
-                            const totalRota = sortedFiliais.reduce((sum, [,qtd]) => sum + qtd, 0);
-                            const rotaBody = sortedFiliais.map(([filial, qtd]) => [
-                                filial,
-                                formatNumber(qtd),
-                                `${(totalRota > 0 ? (qtd/totalRota) * 100 : 0).toFixed(0)}%`
-                            ]);
-                            
-                            if (finalY + (rotaBody.length * 10) > 280) {
-                                doc.addPage();
-                                finalY = 20;
-                            }
-
-                            doc.autoTable({
-                                startY: finalY,
-                                head: [[`Rota ${rota}`,'Unidades','% da Rota']],
-                                body: rotaBody,
-                                theme: 'striped',
-                                headStyles: { fillColor: [91, 106, 114] },
-                            });
-                            finalY = doc.lastAutoTable.finalY + 10;
-                        });
-                        
-                        // 4. Maiores Saídas
-                        doc.addPage();
-                        finalY = 20;
-                        doc.setFontSize(14);
-                        doc.text('Maiores Saídas por SKU (Top 20)', 14, finalY);
-                        finalY += 8;
-                        const productBody = productAnalysis.analysisData.slice(0, 20).map(p => [
-                            p.codigo, p.skus, formatNumber(p.unidades), p.posicao
-                        ]);
-                        doc.autoTable({
-                            startY: finalY,
-                            head: [['Código', 'SKU', 'Unidades', 'Posição']],
-                            body: productBody,
-                            theme: 'grid',
-                            headStyles: { fillColor: [253, 126, 20] }
-                        });
-
-                        doc.save('relatorio_completo_wms.pdf');
-                        showNotification('Relatório PDF gerado com sucesso!', 'success');
-                    } catch(err) {
-                        console.error("Erro ao gerar PDF:", err);
-                        showNotification('Ocorreu um erro ao gerar o relatório PDF.', 'error');
-                    }
-                });
-                // ############# FIM DO CÓDIGO CORRIGIDO #############
             }
 
             document.addEventListener('DOMContentLoaded', () => {
@@ -1637,3 +1494,4 @@
     </script>
 </body>
 </html>
+
