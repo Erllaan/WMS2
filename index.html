@@ -7,6 +7,9 @@
     <!-- Bibliotecas para processamento de dados e relatórios -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- BIBLIOTECAS PDF ATUALIZADAS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
@@ -87,7 +90,7 @@
             padding-top: 2rem;
         }
 
-        #reload-files-btn, #export-data-btn {
+        .action-btn {
             padding: 0.75rem 1.5rem;
             font-size: 1em;
             font-weight: 600;
@@ -105,12 +108,16 @@
         #reload-files-btn:hover { background-color: var(--primary-light); border-color: var(--primary-color); }
 
         #export-data-btn {
-            color: #fff;
-            background-color: var(--sector-primary);
-            border-color: var(--sector-primary);
+            color: var(--sector-primary);
         }
-        #export-data-btn:hover { opacity: 0.85; }
-
+        #export-data-btn:hover { background-color: var(--sector-light); border-color: var(--sector-primary); }
+        
+        #daily-report-btn {
+            color: #fff;
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        #daily-report-btn:hover { opacity: 0.85; }
 
         .filter-container, .search-container { background-color: var(--background-color); padding: 1.5rem; border-radius: var(--border-radius); margin-bottom: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; border: 1px solid #e9ecef; position: relative; }
         .filter-container label { font-weight: 600; color: var(--text-color); font-size: 1em; flex-shrink: 0; }
@@ -159,11 +166,11 @@
         .geral-summary-card .info p { margin: 0; font-size: 1em; color: var(--text-light); }
         .geral-summary-card .info .value { font-size: 1.75em; font-weight: 700; color: var(--text-color); }
 
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; font-size: 1.5em; font-weight: 600; color: var(--primary-color); backdrop-filter: blur(4px); }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5000; font-size: 1.5em; font-weight: 600; color: var(--primary-color); backdrop-filter: blur(4px); }
         .loader-spinner { border: 4px solid var(--primary-light); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .notification { position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 0.5rem; color: #fff; font-weight: 600; z-index: 3000; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; transform: translateX(120%); opacity: 0; visibility: hidden; }
+        .notification { position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 0.5rem; color: #fff; font-weight: 600; z-index: 6000; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; transform: translateX(120%); opacity: 0; visibility: hidden; }
         .notification.show { transform: translateX(0); opacity: 1; visibility: visible; }
         .notification.success { background-color: var(--success-color); }
         .notification.error { background-color: var(--error-color); }
@@ -274,7 +281,7 @@
         }
          .rota-accordion-header .rota-summary-info span {
             margin-left: 1rem;
-         }
+        }
         .rota-accordion-header .toggle-icon-rota {
             font-size: 1.4em;
             transition: transform 0.3s ease;
@@ -331,12 +338,13 @@
             width: 20%;
         }
 
-        .copy-image-btn {
+        .export-btn, .copy-image-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 0.6rem 1.2rem;
             margin-bottom: 1rem;
+            margin-right: 0.5rem;
             border: 1px solid var(--secondary-color);
             background-color: var(--secondary-color);
             color: #fff;
@@ -346,10 +354,12 @@
             font-weight: 600;
             font-size: 0.9em;
         }
-        .copy-image-btn:hover {
+        .export-btn:hover, .copy-image-btn:hover {
             opacity: 0.85;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        .export-btn.pdf { background-color: #dc3545; border-color: #dc3545; }
+        .export-btn.excel { background-color: #198754; border-color: #198754; }
         
         #sector-analysis-table .threat-high { background-color: #f8d7da !important; color: #721c24; }
         #sector-analysis-table .threat-medium { background-color: #fff3cd !important; color: #856404; }
@@ -370,11 +380,14 @@
             display: flex;
             flex-direction: column;
         }
-        .sector-detail-card h3 {
+        .sector-detail-card-header {
             margin: 0;
             padding: 1rem 1.5rem;
             background-color: #f8f9fa;
             border-bottom: 1px solid var(--border-color);
+        }
+        .sector-detail-card-header h3 {
+            margin: 0;
             font-size: 1.2em;
             color: var(--text-color);
         }
@@ -428,7 +441,7 @@
             border-radius: var(--border-radius);
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             width: 100%;
-            max-width: 800px;
+            max-width: 900px; /* Aumentado */
             max-height: 90vh;
             display: flex;
             flex-direction: column;
@@ -455,7 +468,36 @@
             line-height: 1;
         }
         .modal-body { overflow-y: auto; }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        #product-search-actions {
+            padding: 1rem 1.5rem;
+            background-color: var(--background-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        #product-search-actions p {
+            margin: 0;
+            font-weight: 600;
+            flex-grow: 1;
+        }
+        #product-search-actions .action-btn {
+            margin-bottom: 0;
+        }
+
         .text-right { text-align: right; }
+        td.col-select { width: 1%; padding-right: 0; }
+        th.col-select { width: 1%; padding-right: 0; }
 
     </style>
 </head>
@@ -535,8 +577,8 @@
 
         <!-- ABA 2: ANÁLISE POR SETOR -->
         <div id="sector-view" class="hidden">
-             <div id="sector-summary-container"></div>
-             <div id="sector-results-container"></div>
+                <div id="sector-summary-container"></div>
+                <div id="sector-results-container"></div>
         </div>
 
         <!-- ABA 3: ACOMPANHAMENTO DE PRODUTOS -->
@@ -551,23 +593,32 @@
                 <div id="product-search-container" style="margin-top: 3rem;">
                     <h2>Pesquisa Livre de Produtos</h2>
                     <div class="search-container">
-                        <input type="text" id="productSearchInput" placeholder="Digite o nome ou código do produto para pesquisar...">
+                        <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
                     </div>
                     <div id="product-search-results-container">
                         <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
                     </div>
+                        <div id="product-search-actions" class="hidden"></div>
                 </div>
             </div>
         </div>
         
         <div id="actions-container" class="actions-container hidden">
-            <button id="reload-files-btn">
+                <button id="reload-files-btn" class="action-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 7.24 4.12M3.51 15A9 9 0 0 0 16.76 19.88"></path></svg>
                 Limpar e Recomeçar
             </button>
-            <button id="export-data-btn">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Exportar Dados para Partilha
+            <button id="export-data-btn" class="action-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Partilhar Ficheiro (.json)
+            </button>
+            <button id="daily-report-btn" class="action-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+                Gerar Relatório Diário (Excel)
+            </button>
+                <button id="share-online-btn" class="action-btn" style="background-color: var(--product-primary); color: white; border-color: var(--product-primary);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                Partilhar Online
             </button>
         </div>
     </div>
@@ -575,9 +626,89 @@
     <!-- Container para o Modal de Detalhes -->
     <div id="details-modal" class="modal-overlay hidden"></div>
 
-    <script>
+    <!-- NOVO: Modal para partilhar link -->
+    <div id="share-link-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 style="color: var(--primary-color);">Link de Partilha Gerado</h3>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 1em; color: var(--text-light);">Qualquer pessoa com este link poderá ver esta análise de forma interativa (apenas leitura).</p>
+                <div class="search-container" style="margin-bottom: 0;">
+                    <input type="text" id="share-link-input" readonly style="background-color: #e9ecef;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="copy-link-btn" class="action-btn" style="background-color: var(--primary-color); color: #fff; border-color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                    Copiar Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
         // IIFE para encapsular o código
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, getDocs, addDoc, collection } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
         (function() {
+            // --- Firebase Initialization ---
+            let db, auth;
+            let firebaseErrorContainer; // Variavel para o container de erro
+
+            try {
+                // Objeto de configuração do Firebase atualizado conforme a aplicação "Your Trainer Partner"
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDr544e43_iKWNVL9UCKdKONM_s9_gGxTs",
+                    authDomain: "sample-firebase-ai-app-7c4b8.firebaseapp.com",
+                    projectId: "sample-firebase-ai-app-7c4b8",
+                    storageBucket: "sample-firebase-ai-app-7c4b8.appspot.com",
+                    messagingSenderId: "6148922384",
+                    appId: "1:6148922384:web:bc6c9ee340d9726acfbe95"
+                };
+
+                if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.startsWith("AIza")) {
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    signInAnonymously(auth).catch(error => {
+                        console.error("Firebase anonymous sign-in failed:", error);
+                        
+                        if (UIElements.buttons.shareOnline) {
+                            UIElements.buttons.shareOnline.disabled = true;
+                            UIElements.buttons.shareOnline.style.cursor = 'not-allowed';
+                            UIElements.buttons.shareOnline.style.opacity = '0.6';
+                            UIElements.buttons.shareOnline.title = "A partilha online está desativada devido a um erro de configuração.";
+                        }
+
+                        if (error.code === 'auth/admin-restricted-operation') {
+                            showNotification("AÇÃO NECESSÁRIA: Ative a Autenticação Anónima no seu projeto Firebase.", "error", 15000);
+                            // Exibe a mensagem de erro permanente
+                            if(firebaseErrorContainer) {
+                                firebaseErrorContainer.innerHTML = `<strong>Erro de Configuração Firebase:</strong> A partilha online está desativada. Por favor, aceda ao seu <a href="https://console.firebase.google.com/" target="_blank" style="text-decoration: underline; font-weight: bold;">Painel Firebase</a>, vá a <strong>Authentication > Sign-in method</strong> e ative o fornecedor <strong>Anónimo</strong>.`;
+                                firebaseErrorContainer.classList.remove('hidden');
+                            }
+                        } else {
+                            showNotification("Não foi possível conectar ao serviço de partilha.", "error");
+                        }
+                    });
+                } else {
+                    console.error("Firebase config não encontrada ou não preenchida. As funcionalidades de partilha online estarão desativadas.");
+                    if (UIElements.buttons.shareOnline) {
+                        UIElements.buttons.shareOnline.disabled = true;
+                        UIElements.buttons.shareOnline.style.cursor = 'not-allowed';
+                        UIElements.buttons.shareOnline.style.opacity = '0.6';
+                        UIElements.buttons.shareOnline.title = "A partilha online está desativada. Insira as suas chaves Firebase no código.";
+                    }
+                }
+            } catch (error) {
+                console.error("A inicialização do Firebase falhou:", error);
+            }
+            
             // DADOS GLOBAIS
             const masterStoreList = new Map([['VD825',{name:'DSP JEQUIE',rota:'6'}],['VD992',{name:'DSP VITORIA DA CONQUISTA',rota:'6'}],['L2437',{name:'DSP VITORIA DA CONQUISTA II',rota:'6'}],['L2527',{name:'DSP VITORIA DA CONQUISTA JURACY',rota:'6'}],['VD863',{name:'DSP BARREIRAS',rota:'6'}],['VD862',{name:'DSP LUIS EDUARDO MAGALHAES',rota:'6'}],['L2554',{name:'DSP ITABUNA III',rota:'6'}],['L2290',{name:'DSP LUIS EDUARDO MAGALHAES II',rota:'6'}],['L2291',{name:'DSP SANTO ANTONIO DE JESUS',rota:'6'}],['L2412',{name:'DSP ILHEUS',rota:'6'}],['L2662',{name:'DSP SHOPPING BOULEVARD',rota:'7'}],['L2127',{name:'DSP FEIRA DE SANTANA IV',rota:'7'}],['VD390',{name:'DSP FEIRA DE SANTANA',rota:'7'}],['L2116',{name:'DSP FEIRA DE SANTANA III',rota:'7'}],['VD630',{name:'DSP DIAS DAVILA',rota:'7'}],['VD552',{name:'DSP CAMACARI',rota:'7'}],['L2531',{name:'DSP GUARAJUBA',rota:'7'}],['L2204',{name:'DSP SHOPPING CENTER LAPA',rota:'8'}],['L2538',{name:'DSP SALVADOR 1',rota:'8'}],['L2052',{name:'DSP METRO SALVADOR',rota:'8'}],['L2283',{name:'DSP SHOPPING VITORIA BOULEVARD',rota:'8'}],['L2161',{name:'DSP CANELA II',rota:'8'}],['VD395',{name:'DSP CANELA',rota:'8'}],['L2064',{name:'DSP SALVADOR CHAME CHAME',rota:'8'}],['L2173',{name:'DSP PARQUE SHOPPING BAHIA',rota:'9'}],['L2119',{name:'DSP ESTRADA DO COCO',rota:'9'}],['L2363',{name:'DSP VILAS DO ATLANTICO I',rota:'9'}],['L2668',{name:'DSP ALPHAVILLE LITORAL NORTE',rota:'9'}],['VD547',{name:'DSP ITAPUA',rota:'9'}],['VD458',{name:'DSP ITAPUA II',rota:'9'}],['VD744',{name:'DSP PIATA',rota:'9'}],['VD737',{name:'DSP PATAMARES',rota:'9'}],['VD546',{name:'DSP JORGE AMADO',rota:'9'}],['L2003',{name:'DSP TROBOGY',rota:'10'}],['VD834',{name:'DSP SAO RAFAEL',rota:'10'}],['L2174',{name:'DSP SHOPPING PARALELA',rota:'10'}],['VD845',{name:'DSP CAJAZEIRAS',rota:'10'}],['L2221',{name:'DSP PERIPERI',rota:'10'}],['VD643',{name:'DSP SIMOES FILHO',rota:'10'}],['VD620',{name:'DSP CANDEIAS',rota:'10'}],['L2077',{name:'DSP SHOPPING BELLA VISTA',rota:'11'}],['L2211',{name:'DSP PERNAMBUES',rota:'11'}],['VD544',{name:'DSP MATATU',rota:'11'}],['VD929',{name:'DSP ACUPE DE BROTAS',rota:'11'}],['L2631',{name:'DSP BROTAS III',rota:'11'}],['VD399',{name:'DSP NOVA BROTAS',rota:'11'}],['VD981',{name:'DSP VASCO DA GAMA',rota:'11'}],['L2277',{name:'DSP FEDERACAO SALVADOR',rota:'11'}],['VD397',{name:'DSP ONDINA',rota:'11'}],['L2243',{name:'DSP SHOPPING BARRA SALVADOR',rota:'12'}],['L2088',{name:'DSP RIO VERMELHO II',rota:'12'}],['VD432',{name:'DSP PITUBA III',rota:'12'}],['L2056',{name:'DSP PITUBA IV',rota:'12'}],['VD890',{name:'DSP CAMINHO DAS ARVORES II',rota:'12'}],['VD712',{name:'DSP ANITA GARIBALDI',rota:'12'}],['VD398',{name:'DSP MIGUEL CALMON',rota:'12'}],['L2191',{name:'DSP MARES',rota:'12'}],['VD697',{name:'DSP IMBUI',rota:'13'}],['VD550',{name:'DSP COSTA AZUL',rota:'13'}],['L2123',{name:'DSP COSTA AZUL II',rota:'13'}],['VD936',{name:'DSP STIEP',rota:'13'}],['VD393',{name:'DSP CABULA',rota:'13'}],['VD821',{name:'DSP SALVADOR III',rota:'13'}],['VD530',{name:'DSP LAURO DE FREITAS',rota:'14'}],['VD558',{name:'DSP STELLA MARIS',rota:'14'}],['VD926',{name:'DSP CABULA II',rota:'15'}],['L2169',{name:'DSP CANDEAL',rota:'15'}],['L2093',{name:'DSP SHOPPING DA BAHIA 3 PISO',rota:'15'}],['L2092',{name:'DSP SHOPPING DA BAHIA 2 PISO',rota:'15'}],['L2091',{name:'DSP SHOPPING DA BAHIA 1 PISO',rota:'15'}],['VD713',{name:'DSP LARGO DO TAMARINEIRO',rota:'16'}],['VD970',{name:'DSP CAMINHO DE AREIA',rota:'16'}],['VD604',{name:'DSP GRACA',rota:'16'}],['VD220',{name:'DSP PITUBA',rota:'16'}],['VD434',{name:'DSP ALTO DO ITAIGARA',rota:'16'}],['VD568',{name:'DSP CAMINHO DAS ARVORES',rota:'16'}],['VD913',{name:'DSP CAMINHO DAS ARVORES III',rota:'20'}],['VD435',{name:'DSP SHOPPING SALVADOR',rota:'20'}],['L2280',{name:'DSP ALPHAVILLE SALVADOR',rota:'20'}],['L2507',{name:'DSP SHOPPING PATTEO OLINDA',rota:'1'}],['L2526',{name:'DSP SHOPPING CARUARU',rota:'1'}],['L2438',{name:'DSP CARUARU II',rota:'1'}],['L2384',{name:'DSP VITORIA DE SANTO ANTAO',rota:'1'}],['VD794',{name:'DSP JANGA',rota:'1'}],['VD871',{name:'DSP OLINDA II',rota:'1'}],['VD698',{name:'DSP OLINDA',rota:'2'}],['L2493',{name:'DSP ESPINHEIRO',rota:'2'}],['VD288',{name:'DSP RECIFE CENTRO II',rota:'2'}],['L2589',{name:'DSP IPUTINGA',rota:'2'}],['L2368',{name:'DSP CAXANGA',rota:'2'}],['L2386',{name:'DSP IMBIRIBEIRA',rota:'2'}],['L2421',{name:'DSP IPSEP',rota:'2'}],['VD772',{name:'DSP BOA VIAGEM',rota:'3'}],['L2617',{name:'DPSP CONSELHEIRO AGUIAR III',rota:'3'}],['VD755',{name:'DSP BOA VIAGEM II',rota:'3'}],['L2534',{name:'DSP DOMINGOS FERREIRA',rota:'3'}],['L2453',{name:'DSP RIBEIRO DE BRITO',rota:'3'}],['VD770',{name:'DSP BOA VIAGEM V',rota:'3'}],['L2597',{name:'DSP SETUBAL',rota:'3'}],['VD767',{name:'DSP GUARARAPES III',rota:'3'}],['L2371',{name:'DSP ROSA E SILVA',rota:'4'}],['L2375',{name:'DSP ESTRADA DO ARRAIAL',rota:'4'}],['VD695',{name:'DSP TORRE',rota:'4'}],['L2383',{name:'DSP MADALENA II',rota:'4'}],['L2074',{name:'DSP SHOPPING RIOMAR',rota:'4'}],['VD690',{name:'DSP BOA VIAGEM IV',rota:'4'}],['L2508',{name:'DSP SHOPPING RECIFE',rota:'4'}],['L2428',{name:'DSP PETROLINA',rota:'5'}],['L2429',{name:'DSP PETROLina CENTRO',rota:'5'}],['L2496',{name:'DSP PETROLINA II',rota:'5'}],['L2582',{name:'DSP SHOPPING RIVER',rota:'5'}]]);
             
@@ -587,17 +718,17 @@
                 addressData: new Map(),
                 productMasterData: new Map(),
                 nonReturnedOrders: new Set(),
-                processedData: {}
+                processedData: {},
+                selectedProducts: new Set()
             };
+            let isReadOnlySharedView = false;
             let panelHasBeenAutoClosed = false;
             let notificationTimeout;
 
-            // Ordenação customizada de setores
             const customOrder = ["AL FRAGIL", "AL BIG", "Alimentos", "Antibioticos", "MED BIG", "Medicamento 1", "Medicamento 2", "P1 BIG", "Perfumaria 1", "P2 BIG", "Perfumaria 2", "Perfumaria 3", "Piscotropicos", "SEM GIRO", "Romaneio", "Fralda", "Termolabeis", "Volumosos", "Visados", "Visados 2", "Baixo Giro", "Especial"];
             const orderMap = new Map(customOrder.map((name, index) => [name.toUpperCase(), index]));
             const getOrder = (sectorName) => orderMap.get(sectorName.toUpperCase()) ?? Infinity;
 
-            // MAPEAMENTO DE ELEMENTOS DA UI
             const UIElements = {
                 notification: document.getElementById('notification'),
                 loader: document.getElementById('loader'),
@@ -612,7 +743,9 @@
                     switchToSector: document.getElementById('switchToSector'),
                     switchToProduct: document.getElementById('switchToProduct'),
                     reloadFiles: document.getElementById('reload-files-btn'),
-                    exportData: document.getElementById('export-data-btn')
+                    exportData: document.getElementById('export-data-btn'),
+                    dailyReport: document.getElementById('daily-report-btn'),
+                    shareOnline: document.getElementById('share-online-btn')
                 },
                 inputs: {
                     orders: document.getElementById('ordersFileInput'),
@@ -646,7 +779,6 @@
                 }
             };
 
-            // FUNÇÕES UTILITÁRIAS
             function showNotification(message, type = 'success', duration = 3500) {
                 clearTimeout(notificationTimeout);
                 UIElements.notification.textContent = message;
@@ -719,7 +851,6 @@
                 }, 50);
             }
             
-            // HANDLERS DE FICHEIROS
             function handleOrdersFile(event) {
                 processUploadedFile(event.target.files[0], (data) => {
                     appState.ordersData = data;
@@ -851,7 +982,6 @@
                 }
             }
             
-            // LÓGICA DE ANÁLISE PRINCIPAL
             function runValidationAnalysis() {
                 if (appState.ordersData.length === 0 || appState.nonReturnedOrders.size === 0) {
                     UIElements.containers.validationResults.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Pedidos</strong> e a <strong>Planilha de Status</strong> para iniciar a validação.</p></div>`;
@@ -977,14 +1107,13 @@
                     }
                 }
                 
-                // GUARDA DADOS PARA O RELATÓRIO COMPLETO
                 appState.processedData.sectorAnalysis = { setoresData, filialData, totalQuantidadeGeral: totalQuantidade, totalSkusGeral: totalSkus.size, totalUniqueFiliais, filiaisSemFaturamento };
 
                 UIElements.containers.sectorSummary.innerHTML = `
-                     <div class="geral-summary-grid">
-                           <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(totalQuantidade)}</div></div></div>
-                           <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(totalSkus.size)}</div></div></div>
-                     </div>`;
+                        <div class="geral-summary-grid">
+                                <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(totalQuantidade)}</div></div></div>
+                                <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(totalSkus.size)}</div></div></div>
+                        </div>`;
                 
                 displaySectorResults(appState.processedData.sectorAnalysis);
                 autoClosePanel();
@@ -996,18 +1125,18 @@
                     return;
                 }
 
-                // FIX: Restore the container's structure before populating it
                 UIElements.containers.productAnalysis.innerHTML = `
                     <div id="product-top20-geral-container"></div>
                     <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
                     <div id="product-search-container" style="margin-top: 3rem;">
                         <h2>Pesquisa Livre de Produtos</h2>
                         <div class="search-container">
-                            <input type="text" id="productSearchInput" placeholder="Digite o nome ou código do produto para pesquisar...">
+                            <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
                         </div>
                         <div id="product-search-results-container">
-                             <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
+                                <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
                         </div>
+                        <div id="product-search-actions" class="hidden"></div>
                     </div>
                 `;
 
@@ -1048,7 +1177,6 @@
 
                 analysisData.sort((a, b) => b.unidades - a.unidades);
                 
-                // GUARDA DADOS PARA O RELATÓRIO COMPLETO
                 appState.processedData.productAnalysis = { analysisData, productSalesDetails };
 
                 displayProductAnalysisResults(analysisData);
@@ -1064,7 +1192,6 @@
                 setupProductSearch(analysisData, productSalesDetails);
             }
             
-            // FUNÇÕES DE EXIBIÇÃO
             function displayValidationRouteResults(rotasData, container) {
                 container.innerHTML = "";
                 const sortedRotas = Object.keys(rotasData).sort((a, b) => Number(a) - Number(b));
@@ -1134,8 +1261,8 @@
                     sectorSection.innerHTML = `
                         <h2>Acompanhamento por Setor</h2>
                         <button class="copy-image-btn" data-target="#sector-analysis-table" data-filename="analise_por_setor.png">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                             Descarregar Tabela como Imagem
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                                Copiar como Imagem
                         </button>
                         <table id="sector-analysis-table">
                             <thead><tr><th class="col-setor">Setor</th><th class="col-unidades">Unidades</th><th class="col-skus">SKUs</th><th class="col-percent">%</th></tr></thead>
@@ -1159,9 +1286,11 @@
                         
                         return `
                             <div class="sector-detail-card" id="filial-card-${index}">
-                                <h3>Rota: ${rota}</h3>
+                                <div class="sector-detail-card-header">
+                                    <h3>Rota: ${rota}</h3>
+                                </div>
                                 <div style="padding: 1rem 1.5rem 0;">
-                                   <button class="copy-image-btn" data-target="#filial-card-${index} table" data-filename="faturamento_rota_${rota}.png" style="margin-bottom: 0;">Descarregar Imagem</button>
+                                    <button class="copy-image-btn" data-target="#filial-card-${index} table" data-filename="faturamento_rota_${rota}.png" style="margin-bottom: 0;">Copiar como Imagem</button>
                                 </div>
                                 <div class="table-wrapper">
                                     <table>
@@ -1176,8 +1305,8 @@
                     filialSection.innerHTML = `
                         <h2 style="margin-top: 3rem;">Faturamento por Filiais (agrupado por Rota)</h2>
                         <div class="summary-card" style="border-color: var(--sector-primary); background-color: var(--sector-light); color: var(--sector-primary);">
-                             <h2>Resumo de Filiais</h2>
-                             <p>${formatNumber(totalUniqueFiliais)} filiais faturaram no período.</p>
+                                <h2>Resumo de Filiais</h2>
+                                <p>${formatNumber(totalUniqueFiliais)} filiais faturaram no período.</p>
                         </div>
                         <div class="sector-detail-grid">${filialTablesHTML}</div>`;
                 } else {
@@ -1191,12 +1320,12 @@
                     semFaturamentoSection.innerHTML = `
                         <h2 style="margin-top: 3rem; color: var(--error-color); border-bottom-color: #f5c6cb;">Filiais Sem Faturamento</h2>
                         <div class="summary-card" style="border-color: var(--error-color); background-color: #f8d7da; color: #721c24;">
-                             <h2>Atenção</h2>
-                             <p>${filiaisSemFaturamento.length} filiais não apresentaram faturamento no período.</p>
+                                <h2>Atenção</h2>
+                                <p>${filiaisSemFaturamento.length} filiais não apresentaram faturamento no período.</p>
                         </div>
                         <div class="sector-detail-card">
-                             <h3>Lista de Filiais</h3>
-                             <div class="table-wrapper"><ul style="padding: 1.5rem 1.5rem 1.5rem 3rem; margin: 0; font-size: 0.9em; list-style-type: disc;">${listaFiliais}</ul></div>
+                            <div class="sector-detail-card-header"><h3>Lista de Filiais</h3></div>
+                            <div class="table-wrapper"><ul style="padding: 1.5rem 1.5rem 1.5rem 3rem; margin: 0; font-size: 0.9em; list-style-type: disc;">${listaFiliais}</ul></div>
                         </div>`;
                 }
                 container.appendChild(semFaturamentoSection);
@@ -1225,10 +1354,10 @@
 
                 top20Container.innerHTML = `
                     <h2>Acompanhamento de Maiores Saídas por SKU (Top 20 Geral)</h2>
-                     <button class="copy-image-btn" data-target="#product-top20-geral-table" data-filename="top_20_skus_geral.png">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                         Descarregar Tabela como Imagem
-                    </button>
+                        <button class="copy-image-btn" data-target="#product-top20-geral-table" data-filename="top_20_skus_geral.png">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                            Copiar como Imagem
+                        </button>
                     <table id="product-top20-geral-table">
                         <thead><tr><th>Código</th><th>SKUS</th><th class="text-right">Unidades</th><th class="text-right">QMS</th><th class="text-right">CX</th><th class="text-right">%</th><th>Setor</th><th>Posição</th></tr></thead>
                         <tbody>${tableRows}</tbody>
@@ -1245,7 +1374,7 @@
                     </div>
                 `;
 
-                const sortedSectors = Object.keys(productsBySector).sort();
+                const sortedSectors = Object.keys(productsBySector).sort((a,b) => getOrder(a) - getOrder(b));
                 const grid = document.createElement('div');
                 grid.className = 'sector-detail-grid';
 
@@ -1258,12 +1387,21 @@
                     const card = document.createElement('div');
                     card.className = 'sector-detail-card';
                     card.innerHTML = `
-                        <h3>Setor: ${setor}</h3>
+                        <div class="sector-detail-card-header">
+                            <h3>Setor: ${setor}</h3>
+                        </div>
                         <div style="padding: 1rem 1.5rem 0;">
-                            <button class="copy-image-btn" data-target="#sector-card-${index} table" data-filename="top_20_${setor}.png" style="margin-bottom: 0;">Descarregar Imagem</button>
+                                <button class="export-btn pdf" data-type="pdf" data-setor="${setor}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                                    PDF
+                                </button>
+                                <button class="export-btn excel" data-type="excel" data-setor="${setor}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                                    Excel
+                                </button>
                         </div>
                         <div class="table-wrapper">
-                            <table id="sector-card-${index}">
+                            <table id="sector-card-table-${index}">
                                 <thead><tr><th>Código</th><th>SKU</th><th class="text-right">Unidades</th></tr></thead>
                                 <tbody>${tableRows}</tbody>
                                 <tfoot><tr><td colspan="2"><strong>Total do Setor</strong></td><td class="text-right"><strong>${formatNumber(totalUnidadesSetor)}</strong></td></tr></tfoot>
@@ -1285,47 +1423,201 @@
             function setupProductSearch(fullProductList, productSalesDetails) {
                 const searchInput = document.getElementById('productSearchInput');
                 const resultsContainer = document.getElementById('product-search-results-container');
+                const actionsContainer = document.getElementById('product-search-actions');
                 let debounceTimeout;
+
+                function displaySearchResults(results, isSelectionView = false) {
+                    if (results.length === 0) {
+                        resultsContainer.innerHTML = isSelectionView 
+                            ? `<div class="placeholder-card"><p>Nenhum produto selecionado.</p></div>`
+                            : `<div class="placeholder-card"><p>Nenhum produto encontrado.</p></div>`;
+                        return;
+                    }
+
+                    const detailsButtonHTML = (item) => {
+                        if (isReadOnlySharedView) {
+                            return `<td><button class="action-btn" style="padding: 0.5rem 1rem; opacity: 0.5; cursor: not-allowed;" disabled title="Detalhes indisponíveis na vista partilhada">Ver Detalhes</button></td>`;
+                        }
+                        return `<td><button class="details-btn action-btn" data-code="${item.codigo}" style="padding: 0.5rem 1rem;">Ver Detalhes</button></td>`;
+                    };
+
+                    const tableRows = results.map(item => `
+                        <tr>
+                            <td class="col-select"><input type="checkbox" class="product-select" data-code="${item.codigo}" ${appState.selectedProducts.has(item.codigo) ? 'checked' : ''}></td>
+                            <td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td>
+                            <td>${item.setor}</td><td>${item.posicao}</td>
+                            ${detailsButtonHTML(item)}
+                        </tr>`).join('');
+                    resultsContainer.innerHTML = `<table><thead><tr><th class="col-select"><input type="checkbox" id="select-all-visible"></th><th>Código</th><th>SKU</th><th class="text-right">Unidades</th><th>Setor</th><th>Posição</th><th>Ações</th></tr></thead><tbody>${tableRows}</tbody></table>`;
+                }
+                
+                function updateSelectionActions() {
+                    if (appState.selectedProducts.size > 0) {
+                        const exportButtonsHTML = isReadOnlySharedView ? '' : `
+                            <button id="export-selected-excel-btn" class="action-btn excel">Exportar Detalhes (Excel)</button>
+                            <button id="export-selected-pdf-btn" class="action-btn pdf">Exportar Detalhes (PDF)</button>`;
+
+                        actionsContainer.innerHTML = `
+                            <p>${appState.selectedProducts.size} produto(s) selecionado(s)</p>
+                            <button id="view-selected-btn" class="action-btn" style="background-color: var(--primary-color); color: white;">Visualizar Selecionados</button>
+                            ${exportButtonsHTML}
+                            <button id="clear-selection-btn" class="action-btn" style="background-color: var(--secondary-color); color: white;">Limpar Seleção</button>
+                        `;
+                        actionsContainer.classList.remove('hidden');
+                    } else {
+                        actionsContainer.classList.add('hidden');
+                    }
+                }
 
                 searchInput.addEventListener('input', (e) => {
                     clearTimeout(debounceTimeout);
                     debounceTimeout = setTimeout(() => {
-                        const searchTerm = e.target.value.trim().toUpperCase();
-                        if (searchTerm.length < 3) {
-                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>Digite pelo menos 3 caracteres para pesquisar.</p></div>`;
+                        const searchTerms = e.target.value.trim().toUpperCase().split(/[\s,;]+/).filter(term => term.length > 0);
+                        
+                        if (searchTerms.length === 0) {
+                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>`;
                             return;
                         }
 
-                        const searchResults = fullProductList.filter(item => item.codigo.toUpperCase().includes(searchTerm) || item.skus.toUpperCase().includes(searchTerm));
-
-                        if (searchResults.length === 0) {
-                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>Nenhum produto encontrado com o termo "${e.target.value}".</p></div>`;
+                        if (searchTerms.length === 1 && searchTerms[0].length < 3) {
+                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>Digite pelo menos 3 caracteres para pesquisar por um único item.</p></div>`;
                             return;
                         }
-                        const tableRows = searchResults.map(item => `
-                            <tr>
-                                <td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td>
-                                <td>${item.setor}</td><td>${item.posicao}</td>
-                                <td><button class="details-btn" data-code="${item.codigo}">Ver Detalhes</button></td>
-                            </tr>`).join('');
-                        resultsContainer.innerHTML = `<table><thead><tr><th>Código</th><th>SKU</th><th class="text-right">Unidades</th><th>Setor</th><th>Posição</th><th>Ações</th></tr></thead><tbody>${tableRows}</tbody></table>`;
+
+                        const searchResults = fullProductList.filter(item => {
+                            const itemCode = item.codigo.toUpperCase();
+                            const itemSkus = item.skus.toUpperCase();
+                            return searchTerms.some(term => itemCode.includes(term) || itemSkus.includes(term));
+                        });
+
+                        displaySearchResults(searchResults);
                     }, 300);
                 });
 
                 resultsContainer.addEventListener('click', (e) => {
-                    if (e.target?.classList.contains('details-btn')) {
+                    if (e.target.classList.contains('details-btn')) {
                         const productCode = e.target.getAttribute('data-code');
                         showProductDetailsModal(
                             fullProductList.find(p => p.codigo === productCode),
                             productSalesDetails.get(productCode)
                         );
+                    } else if (e.target.classList.contains('product-select')) {
+                        const code = e.target.dataset.code;
+                        if (e.target.checked) {
+                            appState.selectedProducts.add(code);
+                        } else {
+                            appState.selectedProducts.delete(code);
+                        }
+                        updateSelectionActions();
+                    } else if (e.target.id === 'select-all-visible') {
+                            const checkboxes = resultsContainer.querySelectorAll('.product-select');
+                            checkboxes.forEach(cb => {
+                                cb.checked = e.target.checked;
+                                const code = cb.dataset.code;
+                                if (e.target.checked) appState.selectedProducts.add(code);
+                                else appState.selectedProducts.delete(code);
+                            });
+                            updateSelectionActions();
                     }
+                });
+                
+                actionsContainer.addEventListener('click', e => {
+                    if (appState.selectedProducts.size === 0) return;
+                    const selectedItems = fullProductList.filter(p => appState.selectedProducts.has(p.codigo));
+
+                    if (e.target.id === 'view-selected-btn') {
+                        displaySearchResults(selectedItems, true);
+                        searchInput.value = ``;
+                        searchInput.placeholder = `A visualizar ${selectedItems.length} produto(s) selecionado(s)...`;
+                    } else if (e.target.id === 'clear-selection-btn') {
+                        appState.selectedProducts.clear();
+                        searchInput.value = '';
+                        searchInput.placeholder = 'Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)';
+                        searchInput.dispatchEvent(new Event('input'));
+                        updateSelectionActions();
+                    } else if (e.target.id === 'export-selected-excel-btn') {
+                        const sheets = selectedItems.map(item => {
+                            const details = productSalesDetails.get(item.codigo) || [];
+                            const salesByFilial = details.reduce((acc, row) => {
+                                const codigoLoja = String(row['Loja Cross'] || row['Código da Loja'] || 'N/A').trim();
+                                const storeInfo = masterStoreList.get(codigoLoja);
+                                const nomeLoja = storeInfo ? storeInfo.name : (String(row['Nome da Loja'] || '').trim() || 'N/A');
+                                const filialKey = `${codigoLoja} - ${nomeLoja}`;
+                                let rota = String(row['Rota'] || 'N/A').trim();
+                                if(storeInfo && rota === '916') rota = storeInfo.rota;
+                                const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
+
+                                if(!acc[filialKey]) acc[filialKey] = { rota: rota, qtd: 0 };
+                                acc[filialKey].qtd += qty;
+                                return acc;
+                            }, {});
+                            const sortedFiliais = Object.entries(salesByFilial).sort((a,b) => b[1].qtd - a[1].qtd);
+                            const dataToExport = sortedFiliais.map(([filial, data]) => ({ 'Rota': data.rota, 'Filial': filial, 'Unidades': data.qtd }));
+                            return { name: item.codigo.substring(0, 31), data: dataToExport };
+                        });
+                        exportToExcel(sheets, 'detalhes_produtos_selecionados.xlsx');
+
+                    } else if (e.target.id === 'export-selected-pdf-btn') {
+                            const { jsPDF } = window.jspdf;
+                            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                            let lastY = 35;
+                            
+                            doc.setFontSize(18);
+                            doc.setTextColor('#343a40');
+                            doc.text('Relatório Detalhado de Produtos Selecionados', 14, 22);
+
+                            selectedItems.forEach((item, index) => {
+                                    const details = productSalesDetails.get(item.codigo) || [];
+                                    const salesByFilial = details.reduce((acc, row) => {
+                                    const codigoLoja = String(row['Loja Cross'] || row['Código da Loja'] || 'N/A').trim();
+                                    const storeInfo = masterStoreList.get(codigoLoja);
+                                    const nomeLoja = storeInfo ? storeInfo.name : (String(row['Nome da Loja'] || '').trim() || 'N/A');
+                                    const filialKey = `${codigoLoja} - ${nomeLoja}`;
+                                    let rota = String(row['Rota'] || 'N/A').trim();
+                                    if(storeInfo && rota === '916') rota = storeInfo.rota;
+                                    const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
+
+                                    if(!acc[filialKey]) acc[filialKey] = { rota: rota, qtd: 0 };
+                                    acc[filialKey].qtd += qty;
+                                    return acc;
+                                }, {});
+                                const sortedFiliais = Object.entries(salesByFilial).sort((a,b) => b[1].qtd - a[1].qtd);
+                                const body = sortedFiliais.map(([filial, data]) => [data.rota, filial, data.qtd]);
+
+                                    if (index > 0) {
+                                        const spaceNeeded = 15 + body.length * 7; // rough estimate
+                                        if (lastY + spaceNeeded > 280) { // check if new table fits
+                                            doc.addPage();
+                                            lastY = 22;
+                                        } else {
+                                            lastY += 15;
+                                        }
+                                    }
+
+                                    doc.setFontSize(12);
+                                    const productColor = getComputedStyle(document.documentElement).getPropertyValue('--product-primary').trim();
+                                    doc.setTextColor(productColor);
+                                    doc.text(`${item.codigo} - ${item.skus}`, 14, lastY);
+                                    
+                                    doc.autoTable({
+                                        head: [['Rota', 'Filial', 'Unidades']],
+                                        body: body,
+                                        startY: lastY + 2,
+                                        theme: 'grid',
+                                        headStyles: { fillColor: [111, 66, 193] },
+                                        didDrawPage: (data) => {
+                                            lastY = data.cursor.y;
+                                        }
+                                    });
+                                });
+                                doc.save('detalhes_produtos_selecionados.pdf');
+                        }
                 });
             }
 
             function showProductDetailsModal(productInfo, salesDetails) {
                 const modal = document.getElementById('details-modal');
-                const salesByFilial = salesDetails.reduce((acc, row) => {
+                const salesByFilial = (salesDetails || []).reduce((acc, row) => {
                     const codigoLoja = String(row['Loja Cross'] || row['Código da Loja'] || 'N/A').trim();
                     const storeInfo = masterStoreList.get(codigoLoja);
                     const nomeLoja = storeInfo ? storeInfo.name : (String(row['Nome da Loja'] || '').trim() || 'N/A');
@@ -1346,36 +1638,42 @@
                     <div class="modal-content">
                         <div class="modal-header"><h3>Detalhes de Saída: ${productInfo.skus} (${productInfo.codigo})</h3><button class="modal-close-btn">&times;</button></div>
                         <div class="modal-body"><table><thead><tr><th>Rota</th><th>Filial</th><th class="text-right">Unidades</th></tr></thead><tbody>${tableRows}</tbody></table></div>
+                        <div class="modal-footer">
+                            <button class="export-btn pdf" data-type="pdf" data-code="${productInfo.codigo}">Exportar PDF</button>
+                            <button class="export-btn excel" data-type="excel" data-code="${productInfo.codigo}">Exportar Excel</button>
+                        </div>
                     </div>`;
                 modal.classList.remove('hidden');
                 modal.querySelector('.modal-close-btn').addEventListener('click', () => modal.classList.add('hidden'));
-                modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+                modal.addEventListener('click', (e) => { 
+                    if (e.target === modal) modal.classList.add('hidden');
+                    else if (e.target.classList.contains('export-btn')) {
+                            const type = e.target.dataset.type;
+                            const code = e.target.dataset.code;
+                            const filename = `Detalhes_Produto_${code.replace(/\s/g, '_')}`;
+                            const title = `Detalhes de Saída: ${productInfo.skus} (${code})`;
+                            const head = ['Rota', 'Filial', 'Unidades'];
+                            const body = sortedFiliais.map(([filial, data]) => [data.rota, filial, data.qtd]);
+                            
+                            if(type === 'excel') {
+                                const dataToExport = body.map(row => ({ 'Rota': row[0], 'Filial': row[1], 'Unidades': row[2] }));
+                                exportToExcel([{ name: 'Detalhes', data: dataToExport }], `${filename}.xlsx`);
+                            } else {
+                                exportToPdf(title, head, body, `${filename}.pdf`);
+                            }
+                    }
+                });
             }
 
             function loadDataFromSharedObject(sharedData, isReadOnly = false) {
-                if (sharedData.ordersData) {
-                    localStorage.setItem('ordersData', JSON.stringify(sharedData.ordersData));
-                }
-                if (sharedData.nonReturnedOrders) {
-                    localStorage.setItem('nonReturnedOrders', JSON.stringify(sharedData.nonReturnedOrders));
-                }
-                if (sharedData.sectorData) {
-                    localStorage.setItem('sectorData', JSON.stringify(sharedData.sectorData));
-                }
-                if (sharedData.addressData) {
-                    localStorage.setItem('addressData', JSON.stringify(sharedData.addressData));
-                }
-                if (sharedData.productMasterData) {
-                    localStorage.setItem('productMasterData', JSON.stringify(sharedData.productMasterData));
-                }
-                if (sharedData.lastUpdateTime) {
-                    localStorage.setItem('lastUpdateTime', sharedData.lastUpdateTime);
-                }
-
-                if (isReadOnly) {
-                    UIElements.fileControl.panel.classList.add('hidden');
-                }
-
+                isReadOnlySharedView = isReadOnly;
+                if (sharedData.ordersData) localStorage.setItem('ordersData', JSON.stringify(sharedData.ordersData));
+                if (sharedData.nonReturnedOrders) localStorage.setItem('nonReturnedOrders', JSON.stringify(sharedData.nonReturnedOrders));
+                if (sharedData.sectorData) localStorage.setItem('sectorData', JSON.stringify(sharedData.sectorData));
+                if (sharedData.addressData) localStorage.setItem('addressData', JSON.stringify(sharedData.addressData));
+                if (sharedData.productMasterData) localStorage.setItem('productMasterData', JSON.stringify(sharedData.productMasterData));
+                if (sharedData.lastUpdateTime) localStorage.setItem('lastUpdateTime', sharedData.lastUpdateTime);
+                if (isReadOnly) UIElements.fileControl.panel.classList.add('hidden');
                 loadDataFromStorage();
             }
 
@@ -1394,9 +1692,7 @@
                 if (addressDataArray) { appState.addressData = new Map(addressDataArray); UIElements.dropAreas.address.classList.add('loaded'); dataLoaded = true; }
                 if (productMasterDataArray) { appState.productMasterData = new Map(productMasterDataArray); UIElements.dropAreas.productMaster.classList.add('loaded'); dataLoaded = true; }
 
-                if (savedTimestamp) {
-                    updateTimestamp(savedTimestamp);
-                }
+                if (savedTimestamp) updateTimestamp(savedTimestamp);
 
                 if (dataLoaded) {
                     showNotification('Dados da sessão anterior carregados.', 'success');
@@ -1407,11 +1703,318 @@
                     autoClosePanel();
                 }
             }
+            
+            async function loadAnalysisFromFirebase(analysisId) {
+                isReadOnlySharedView = true;
+                if (!db) {
+                    showNotification("Serviço de partilha indisponível.", "error");
+                    return;
+                }
+                UIElements.loader.classList.remove('hidden');
+                
+                try {
+                    // 1. Carregar o documento principal (manifesto).
+                    const manifestDocRef = doc(db, "shared_analyses", analysisId);
+                    const manifestSnap = await getDoc(manifestDocRef);
+
+                    if (manifestSnap.exists()) {
+                        const manifestData = manifestSnap.data();
+
+                        if (!manifestData.processedSectorAnalysis) {
+                            showNotification("Formato de partilha inválido ou antigo.", "error");
+                            return;
+                        }
+
+                        // 2. Carregar todos os pedaços (chunks) de dados da subcoleção.
+                        const chunksCollectionRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+                        const chunksSnapshot = await getDocs(chunksCollectionRef);
+                        
+                        let allAnalysisData = [];
+                        if (!chunksSnapshot.empty) {
+                            const sortedChunks = chunksSnapshot.docs.map(doc => doc.data()).sort((a, b) => a.chunkIndex - b.chunkIndex);
+                            sortedChunks.forEach(chunk => {
+                                allAnalysisData = allAnalysisData.concat(chunk.data);
+                            });
+                        }
+
+                        // 3. Reconstruir os objetos de análise completos.
+                        const sectorAnalysis = {
+                            setoresData: new Map(Object.entries(manifestData.processedSectorAnalysis.setoresData).map(([setor, data]) => {
+                                return [setor, {
+                                    totalQtd: data.totalQtd,
+                                    products: new Map(Object.entries(data.products))
+                                }];
+                            })),
+                            filialData: new Map(Object.entries(manifestData.processedSectorAnalysis.filialData).map(([rota, filiais]) => {
+                                return [rota, new Map(Object.entries(filiais))];
+                            })),
+                            totalQuantidadeGeral: manifestData.processedSectorAnalysis.totalQuantidadeGeral,
+                            totalSkusGeral: manifestData.processedSectorAnalysis.totalSkusGeral,
+                            totalUniqueFiliais: manifestData.processedSectorAnalysis.totalUniqueFiliais,
+                            filiaisSemFaturamento: manifestData.processedSectorAnalysis.filiaisSemFaturamento
+                        };
+
+                        const productAnalysis = {
+                            analysisData: allAnalysisData,
+                            productSalesDetails: new Map() // Detalhes não são carregados na vista partilhada
+                        };
+
+                        appState.processedData.sectorAnalysis = sectorAnalysis;
+                        appState.processedData.productAnalysis = productAnalysis;
+                        
+                        // INFO: Apenas as abas de análise são mostradas na vista partilhada.
+                        document.getElementById('file-control-panel').classList.add('hidden');
+                        document.getElementById('switchToValidation').classList.add('hidden');
+                        document.getElementById('actions-container').classList.add('hidden');
+
+                        const validationBtn = UIElements.buttons.switchToValidation;
+                        const sectorBtn = UIElements.buttons.switchToSector;
+                        validationBtn.classList.remove('active');
+                        sectorBtn.classList.add('active');
+                        UIElements.views.validation.classList.add('hidden');
+                        UIElements.views.sector.classList.remove('hidden');
+
+                        showNotification('Análise partilhada carregada.', 'success');
+                        
+                        if (manifestData.lastUpdateTime) {
+                            updateTimestamp(manifestData.lastUpdateTime);
+                        }
+                        
+                        // INFO: Apenas os dados processados são carregados, não as planilhas originais.
+                        // As funções de visualização são chamadas diretamente com os dados prontos.
+                        UIElements.containers.sectorSummary.innerHTML = `
+                            <div class="geral-summary-grid">
+                                <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(sectorAnalysis.totalQuantidadeGeral)}</div></div></div>
+                                <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(sectorAnalysis.totalSkusGeral)}</div></div></div>
+                            </div>`;
+                        displaySectorResults(sectorAnalysis);
+                        
+                        UIElements.containers.productAnalysis.innerHTML = `
+                            <div id="product-top20-geral-container"></div>
+                            <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
+                            <div id="product-search-container" style="margin-top: 3rem;">
+                                <h2>Pesquisa Livre de Produtos</h2>
+                                <div class="search-container">
+                                    <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
+                                </div>
+                                <div id="product-search-results-container">
+                                        <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
+                                </div>
+                                <div id="product-search-actions" class="hidden"></div>
+                            </div>
+                        `;
+                        displayProductAnalysisResults(productAnalysis.analysisData);
+                        const productsBySector = productAnalysis.analysisData.reduce((acc, product) => {
+                            const sector = product.setor || 'N/A';
+                            if (!acc[sector]) acc[sector] = [];
+                            acc[sector].push(product);
+                            return acc;
+                        }, {});
+                        displayTop20BySector(productsBySector);
+                        setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
+
+                    } else {
+                        showNotification("Análise não encontrada. O link pode estar incorreto ou a análise foi apagada.", "error");
+                    }
+                } catch (error) {
+                    console.error("Error loading analysis from Firebase:", error);
+                    showNotification("Erro ao carregar a análise partilhada.", "error");
+                } finally {
+                    UIElements.loader.classList.add('hidden');
+                }
+            }
+
+            async function saveAnalysisToFirebase() {
+                if (!db) {
+                    showNotification("Serviço de partilha indisponível.", "error");
+                    return;
+                }
+                if (!appState.processedData.sectorAnalysis || !appState.processedData.productAnalysis) {
+                    showNotification('Execute pelo menos uma análise antes de partilhar.', 'error');
+                    return;
+                }
+                UIElements.loader.classList.remove('hidden');
+                
+                try {
+                    // INFO: Apenas os dados processados e resumidos são preparados para a partilha.
+                    // As planilhas originais (appState.ordersData, etc.) NÃO são incluídas.
+                    const serializableSectorAnalysis = {
+                        setoresData: Object.fromEntries(
+                            [...appState.processedData.sectorAnalysis.setoresData.entries()].map(([setor, data]) => {
+                                return [setor, {
+                                    totalQtd: data.totalQtd,
+                                    products: Object.fromEntries(data.products)
+                                }];
+                            })
+                        ),
+                        filialData: Object.fromEntries(
+                            [...appState.processedData.sectorAnalysis.filialData.entries()].map(([rota, filiais]) => {
+                                return [rota, Object.fromEntries(filiais)];
+                            })
+                        ),
+                        totalQuantidadeGeral: appState.processedData.sectorAnalysis.totalQuantidadeGeral,
+                        totalSkusGeral: appState.processedData.sectorAnalysis.totalSkusGeral,
+                        totalUniqueFiliais: appState.processedData.sectorAnalysis.totalUniqueFiliais,
+                        filiaisSemFaturamento: appState.processedData.sectorAnalysis.filiaisSemFaturamento
+                    };
+                    
+                    // 1. Criar o documento principal (manifesto) SEM os dados pesados.
+                    const manifestData = {
+                        processedSectorAnalysis: serializableSectorAnalysis,
+                        // Os dados de produto serão guardados em pedaços (chunks) separados.
+                        lastUpdateTime: localStorage.getItem('lastUpdateTime') || new Date().toISOString(),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    const manifestDocRef = await addDoc(collection(db, "shared_analyses"), manifestData);
+                    const analysisId = manifestDocRef.id;
+
+                    // 2. Dividir os dados pesados (analysisData) em pedaços (chunks).
+                    const analysisData = appState.processedData.productAnalysis.analysisData;
+                    const chunkSize = 2000; // Número de itens por documento para ficar abaixo do limite de 1MB.
+                    const dataChunks = [];
+                    for (let i = 0; i < analysisData.length; i += chunkSize) {
+                        dataChunks.push(analysisData.slice(i, i + chunkSize));
+                    }
+
+                    // 3. Guardar cada pedaço numa subcoleção dentro do documento principal.
+                    const chunksCollectionRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+                    for (let i = 0; i < dataChunks.length; i++) {
+                        await addDoc(chunksCollectionRef, {
+                            chunkIndex: i, // Para manter a ordem
+                            data: dataChunks[i]
+                        });
+                    }
+                    
+                    const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
+                    showShareLinkModal(shareUrl);
+                    
+                } catch (error) {
+                    console.error("Error saving analysis to Firebase:", error);
+                    showNotification("Erro ao guardar a análise para partilha. Verifique a console para mais detalhes.", "error");
+                } finally {
+                    UIElements.loader.classList.add('hidden');
+                }
+            }
+
+            function showShareLinkModal(url) {
+                const modal = document.getElementById('share-link-modal');
+                const urlInput = document.getElementById('share-link-input');
+                const copyBtn = document.getElementById('copy-link-btn');
+                const originalBtnContent = copyBtn.innerHTML;
+                
+                urlInput.value = url;
+                modal.classList.remove('hidden');
+                
+                modal.querySelector('.modal-close-btn').onclick = () => modal.classList.add('hidden');
+                modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
+                
+                copyBtn.onclick = () => {
+                    urlInput.select();
+                    urlInput.setSelectionRange(0, 99999); // Para mobile
+                    document.execCommand('copy');
+                    showNotification('Link copiado para a área de transferência!', 'success');
+                    copyBtn.textContent = 'Copiado!';
+                    setTimeout(() => { copyBtn.innerHTML = originalBtnContent; }, 2000);
+                };
+            }
+
+            function exportToExcel(sheets, filename = 'relatorio.xlsx') {
+                try {
+                    const workbook = XLSX.utils.book_new();
+                    sheets.forEach(sheetInfo => {
+                        if (!sheetInfo.data || sheetInfo.data.length === 0) return;
+                        
+                        const header = Object.keys(sheetInfo.data[0]);
+                        const aoa = [header, ...sheetInfo.data.map(row => header.map(key => row[key]))];
+                        const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+
+                        const colWidths = header.map((h, i) => ({
+                            wch: Math.max(h.length, ...sheetInfo.data.map(row => String(row[h] || '').length)) + 2
+                        }));
+                        worksheet['!cols'] = colWidths;
+
+                        const headerStyle = { font: { bold: true, color: { rgb: "FFFFFF" }}, fill: { fgColor: { rgb: "6F42C1" } } };
+                        header.forEach((h, i) => {
+                            const cellRef = XLSX.utils.encode_cell({c: i, r: 0});
+                            if (worksheet[cellRef]) worksheet[cellRef].s = headerStyle;
+                        });
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, sheetInfo.name);
+                    });
+
+                    if (workbook.SheetNames.length > 0) {
+                        XLSX.writeFile(workbook, filename);
+                        showNotification(`Ficheiro Excel "${filename}" descarregado!`, 'success');
+                    } else {
+                        showNotification('Nenhum dado para exportar.', 'warning');
+                    }
+                } catch (error) {
+                    console.error("Erro ao exportar para Excel:", error);
+                    showNotification('Falha ao gerar o ficheiro Excel.', 'error');
+                }
+            }
+
+            function exportToPdf(title, head, body, filename) {
+                try {
+                    showNotification('A gerar PDF...', 'warning', 2000);
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+                    doc.setFontSize(18);
+                    doc.setTextColor('#343a40');
+                    doc.text(title, 14, 22);
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(100);
+                    const today = new Date().toLocaleDateString('pt-BR');
+                    doc.text(`Relatório gerado em: ${today}`, 14, 30);
+
+                    doc.autoTable({
+                        head: [head],
+                        body: body,
+                        startY: 35,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [111, 66, 193], // --sector-primary
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold'
+                        },
+                        styles: {
+                            fontSize: 9,
+                            cellPadding: 2,
+                            overflow: 'linebreak'
+                        },
+                        columnStyles: {
+                            // Example: 1: { cellWidth: 'auto' } for the second column
+                        }
+                    });
+
+                    doc.save(filename);
+                    showNotification(`Ficheiro PDF "${filename}" descarregado!`, 'success');
+                } catch(error) {
+                        console.error("Erro ao gerar PDF:", error);
+                        showNotification('Falha ao gerar o ficheiro PDF.', 'error');
+                }
+            }
 
             function initializeEventListeners() {
+                // Adiciona o container de erro do Firebase ao DOM
+                firebaseErrorContainer = document.createElement('div');
+                firebaseErrorContainer.id = "firebase-error-container";
+                firebaseErrorContainer.className = "hidden";
+                firebaseErrorContainer.style.textAlign = 'center';
+                firebaseErrorContainer.style.padding = '1rem';
+                firebaseErrorContainer.style.backgroundColor = 'var(--error-color)';
+                firebaseErrorContainer.style.color = 'white';
+                firebaseErrorContainer.style.borderRadius = 'var(--border-radius)';
+                firebaseErrorContainer.style.marginBottom = '1.5rem';
+                UIElements.fileControl.panel.insertAdjacentElement('beforebegin', firebaseErrorContainer);
+
+
                 const switchView = (activeView) => {
                     Object.values(UIElements.views).forEach(v => v.classList.add('hidden'));
-                    Object.values(UIElements.buttons).forEach(b => b.classList.remove('active'));
+                    Object.values(UIElements.buttons).forEach(b => { if(b.id.startsWith('switchTo')) b.classList.remove('active'); });
                     UIElements.views[activeView].classList.remove('hidden');
                     const btnKey = `switchTo${activeView.charAt(0).toUpperCase() + activeView.slice(1)}`;
                     if(UIElements.buttons[btnKey]) UIElements.buttons[btnKey].classList.add('active');
@@ -1434,15 +2037,21 @@
                 UIElements.inputs.sharedFile.addEventListener('change', handleSharedFile);
                 
                 UIElements.buttons.reloadFiles.addEventListener('click', () => {
-                    // Limpa o localStorage e recarrega a página
                     Object.keys(localStorage).forEach(key => localStorage.removeItem(key));
                     window.location.href = window.location.href.split('?')[0];
                 });
 
+                if (UIElements.buttons.shareOnline) {
+                    UIElements.buttons.shareOnline.addEventListener('click', saveAnalysisToFirebase);
+                }
+
                 document.body.addEventListener('click', e => {
-                    if (e.target?.classList.contains('copy-image-btn')) {
-                        const targetSelector = e.target.dataset.target;
-                        const filename = e.target.dataset.filename || 'relatorio.png';
+                    const copyImageButton = e.target.closest('.copy-image-btn');
+                    const exportButton = e.target.closest('.export-btn');
+
+                    if (copyImageButton) {
+                        const targetSelector = copyImageButton.dataset.target;
+                        const filename = copyImageButton.dataset.filename || 'relatorio.png';
                         const elementToCopy = document.querySelector(targetSelector);
                         if (!elementToCopy) {
                             showNotification('Erro: Elemento do relatório não encontrado.', 'error');
@@ -1456,39 +2065,113 @@
                                 link.download = filename;
                                 link.href = canvas.toDataURL('image/png');
                                 link.click();
-                                showNotification('Imagem do relatório descarregada!', 'success');
+                                showNotification('Imagem copiada para transferência!', 'success');
                             }).catch(err => {
                                 console.error("Erro do html2canvas:", err);
                                 showNotification('Falha ao gerar a imagem.', 'error');
                             });
+                    } else if (exportButton && exportButton.closest('.sector-detail-card')) {
+                        const setor = exportButton.dataset.setor;
+                        const type = exportButton.dataset.type;
+                        const products = appState.processedData.productAnalysis.analysisData.filter(p => p.setor === setor);
+                        const top20 = products.sort((a,b) => b.unidades - a.unidades).slice(0, 20);
+                        const filename = `Top_20_SKUs_${setor.replace(/\s/g, '_')}`;
+
+                        if (type === 'excel') {
+                            const dataToExport = top20.map(p => ({ 'Código': p.codigo, 'SKU': p.skus, 'Unidades': p.unidades, 'Posição': p.posicao }));
+                            exportToExcel([{ name: `Top 20 ${setor}`, data: dataToExport }], `${filename}.xlsx`);
+                        } else if (type === 'pdf') {
+                            const title = `Top 20 SKUs - Setor ${setor}`;
+                            const head = ['Código', 'SKU', 'Unidades'];
+                            const body = top20.map(p => [p.codigo, p.skus, p.unidades]);
+                            exportToPdf(title, head, body, `${filename}.pdf`);
+                        }
                     }
                 });
 
-                UIElements.buttons.exportData.addEventListener('click', () => {
-                    const dataToShare = {
-                        ordersData: appState.ordersData,
-                        nonReturnedOrders: Array.from(appState.nonReturnedOrders),
-                        sectorData: appState.sectorData,
-                        addressData: Array.from(appState.addressData.entries()),
-                        productMasterData: Array.from(appState.productMasterData.entries()),
-                        lastUpdateTime: localStorage.getItem('lastUpdateTime')
-                    };
+                if (UIElements.buttons.exportData) {
+                    UIElements.buttons.exportData.addEventListener('click', () => {
+                        const dataToShare = {
+                            ordersData: appState.ordersData,
+                            nonReturnedOrders: Array.from(appState.nonReturnedOrders),
+                            sectorData: appState.sectorData,
+                            addressData: Array.from(appState.addressData.entries()),
+                            productMasterData: Array.from(appState.productMasterData.entries()),
+                            lastUpdateTime: localStorage.getItem('lastUpdateTime')
+                        };
+                        const blob = new Blob([JSON.stringify(dataToShare)], {type: 'application/json'});
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = 'relatorio-partilhado.json';
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        showNotification('Ficheiro de partilha (.json) descarregado!', 'success');
+                    });
+                }
+                
+                if (UIElements.buttons.dailyReport) {
+                    UIElements.buttons.dailyReport.addEventListener('click', () => {
+                        if (!appState.processedData.sectorAnalysis || !appState.processedData.productAnalysis) {
+                            showNotification('Carregue as planilhas de Itens e Endereços para gerar o relatório.', 'error');
+                            return;
+                        }
+                        showNotification('A gerar relatório diário...', 'warning', 2000);
 
-                    const blob = new Blob([JSON.stringify(dataToShare)], {type: 'application/json'});
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'relatorio-partilhado.json';
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    showNotification('Ficheiro de partilha (.json) descarregado!', 'success');
-                });
+                        const sheets = [];
+                        // 1. Faturamento por Rota
+                        const { filialData } = appState.processedData.sectorAnalysis;
+                        const faturamentoPorRota = new Map();
+                        for (const [rota, filiais] of filialData.entries()) {
+                            faturamentoPorRota.set(rota, [...filiais.values()].reduce((a, b) => a + b, 0));
+                        }
+                        const rotaData = Array.from(faturamentoPorRota.entries())
+                            .map(([rota, unidades]) => ({'Rota': rota, 'Total Unidades': unidades}))
+                            .sort((a,b) => Number(a.Rota) - Number(b.Rota));
+                        if(rotaData.length > 0) sheets.push({ name: 'Faturamento por Rota', data: rotaData });
+
+                        // 2. Faturamento por Setor
+                        const { setoresData } = appState.processedData.sectorAnalysis;
+                            const setorData = [...setoresData.entries()]
+                                    .map(([setor, data]) => ({'Setor': setor, 'Total Unidades': data.totalQtd, 'Total SKUs': data.products.size}))
+                                    .sort((a,b) => getOrder(a.Setor) - getOrder(b.Setor));
+                        if(setorData.length > 0) sheets.push({ name: 'Faturamento por Setor', data: setorData });
+
+                        // 3. Maiores SKUs (Top 50)
+                        const { analysisData } = appState.processedData.productAnalysis;
+                        const top50SKUs = analysisData.slice(0, 50).map(item => ({
+                            'Código': item.codigo,
+                            'SKU': item.skus,
+                            'Unidades': item.unidades,
+                            'Caixas (QMS)': parseFloat(item.cx.toFixed(2)),
+                            'Setor': item.setor,
+                            'Posição': item.posicao
+                        }));
+                        if(top50SKUs.length > 0) sheets.push({ name: 'Top 50 SKUs', data: top50SKUs });
+
+                        const today = new Date().toISOString().slice(0, 10);
+                        exportToExcel(sheets, `Relatorio_Diario_${today}.xlsx`);
+                    });
+                }
 
             }
 
             document.addEventListener('DOMContentLoaded', () => {
                 initializeEventListeners();
-                loadDataFromStorage();
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const analysisId = urlParams.get('analysis');
+
+                if (analysisId) {
+                    // Se um ID de análise estiver no URL, carregar do Firebase
+                    // Um pequeno atraso para garantir que a autenticação do Firebase inicializou
+                    setTimeout(() => {
+                        loadAnalysisFromFirebase(analysisId);
+                    }, 500);
+                } else {
+                    // Caso contrário, carregar do localStorage como de costume
+                    loadDataFromStorage();
+                }
             });
         })();
     </script>
