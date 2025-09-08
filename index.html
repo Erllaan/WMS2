@@ -1861,7 +1861,6 @@
                     // 1. Criar o documento principal (manifesto) SEM os dados pesados.
                     const manifestData = {
                         processedSectorAnalysis: serializableSectorAnalysis,
-                        // Os dados de produto serão guardados em pedaços (chunks) separados.
                         lastUpdateTime: localStorage.getItem('lastUpdateTime') || new Date().toISOString(),
                         createdAt: new Date().toISOString()
                     };
@@ -1872,19 +1871,21 @@
                     // 2. Dividir os dados pesados (analysisData) em pedaços (chunks).
                     const analysisData = appState.processedData.productAnalysis.analysisData;
                     const chunkSize = 2000; // Número de itens por documento para ficar abaixo do limite de 1MB.
-                    const dataChunks = [];
+                    const writePromises = [];
+                    const chunksCollectionRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+
                     for (let i = 0; i < analysisData.length; i += chunkSize) {
-                        dataChunks.push(analysisData.slice(i, i + chunkSize));
+                        const chunk = analysisData.slice(i, i + chunkSize);
+                        const chunkDoc = {
+                            chunkIndex: i / chunkSize,
+                            data: chunk
+                        };
+                        // Adiciona a promessa de escrita ao array.
+                        writePromises.push(addDoc(chunksCollectionRef, chunkDoc));
                     }
 
-                    // 3. Guardar cada pedaço numa subcoleção dentro do documento principal.
-                    const chunksCollectionRef = collection(db, "shared_analyses", analysisId, "data_chunks");
-                    for (let i = 0; i < dataChunks.length; i++) {
-                        await addDoc(chunksCollectionRef, {
-                            chunkIndex: i, // Para manter a ordem
-                            data: dataChunks[i]
-                        });
-                    }
+                    // 3. Executar todas as escritas dos chunks em paralelo.
+                    await Promise.all(writePromises);
                     
                     const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
                     showShareLinkModal(shareUrl);
