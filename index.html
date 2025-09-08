@@ -1717,15 +1717,14 @@
                 UIElements.loader.classList.remove('hidden');
 
                 try {
-                    // --- PREPARAÇÃO DOS DADOS ---
                     const { sectorAnalysis, productAnalysis } = appState.processedData;
 
-                    // 1. Criar o documento principal (manifesto) APENAS COM METADADOS.
+                    // 1. Criar o documento principal (manifesto) com metadados.
                     const manifestData = {
                         totalQuantidadeGeral: sectorAnalysis.totalQuantidadeGeral,
                         totalSkusGeral: sectorAnalysis.totalSkusGeral,
                         totalUniqueFiliais: sectorAnalysis.totalUniqueFiliais,
-                        filiaisSemFaturamento: sectorAnalysis.filiaisSemFaturamento,
+                        filiaisSemFaturamento: sectorAnalysis.filiaisSemFaturamento || [],
                         lastUpdateTime: localStorage.getItem('lastUpdateTime') || new Date().toISOString(),
                         createdAt: new Date().toISOString()
                     };
@@ -1733,33 +1732,38 @@
                     const manifestDocRef = await addDoc(collection(db, "shared_analyses"), manifestData);
                     const analysisId = manifestDocRef.id;
 
-                    // --- DIVISÃO E ESCRITA EM LOTE (PROMISES) ---
                     const writePromises = [];
                     const { setoresData, filialData } = sectorAnalysis;
                     const analysisData = productAnalysis.analysisData;
 
-                    // 2. Salvar dados de SETORES em uma subcoleção ('sector_chunks')
-                    const sectorChunksRef = collection(db, "shared_analyses", analysisId, "sector_chunks");
+                    // 2. Salvar dados de SETORES (um documento por produto em cada setor).
+                    const sectorDataRef = collection(db, "shared_analyses", analysisId, "sector_data");
                     for (const [setor, data] of setoresData.entries()) {
-                        const sectorDoc = {
-                            setor: setor,
-                            totalQtd: data.totalQtd,
-                            products: Object.fromEntries(data.products) // Converte Map para Objeto
-                        };
-                        writePromises.push(addDoc(sectorChunksRef, sectorDoc));
+                        for (const [codigo, productData] of data.products.entries()) {
+                            const productDoc = {
+                                setor: setor,
+                                codigo: codigo,
+                                descr: productData.descr,
+                                totalQtd: productData.totalQtd
+                            };
+                            writePromises.push(addDoc(sectorDataRef, productDoc));
+                        }
                     }
 
-                    // 3. Salvar dados de FILIAIS em uma subcoleção ('filial_chunks')
-                    const filialChunksRef = collection(db, "shared_analyses", analysisId, "filial_chunks");
+                    // 3. Salvar dados de FILIAIS (um documento por filial em cada rota).
+                    const filialDataRef = collection(db, "shared_analyses", analysisId, "filial_data");
                     for (const [rota, filiais] of filialData.entries()) {
-                        const filialDoc = {
-                            rota: rota,
-                            filiais: Object.fromEntries(filiais) // Converte Map para Objeto
-                        };
-                        writePromises.push(addDoc(filialChunksRef, filialDoc));
+                        for (const [filial, unidades] of filiais.entries()) {
+                             const filialDoc = {
+                                rota: rota,
+                                filial: filial,
+                                unidades: unidades
+                            };
+                            writePromises.push(addDoc(filialDataRef, filialDoc));
+                        }
                     }
 
-                    // 4. Salvar dados de PRODUTOS em 'data_chunks' (lógica que você já tinha)
+                    // 4. Salvar dados de PRODUTOS em 'data_chunks' (lógica existente).
                     const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
                     const chunkSize = 2000;
                     for (let i = 0; i < analysisData.length; i += chunkSize) {
@@ -1771,7 +1775,7 @@
                         writePromises.push(addDoc(dataChunksRef, chunkDoc));
                     }
 
-                    // 5. Executar todas as operações de escrita de uma vez.
+                    // 5. Executar todas as operações de escrita.
                     await Promise.all(writePromises);
 
                     const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
@@ -1779,7 +1783,13 @@
 
                 } catch (error) {
                     console.error("Error saving analysis to Firebase:", error);
-                    showNotification("Erro ao guardar a análise para partilha. Verifique a console para mais detalhes.", "error");
+                    let errorMessage = "Erro ao guardar a análise para partilha.";
+                    if (error.code === 'permission-denied') {
+                        errorMessage = "Erro de permissão. Verifique as regras de segurança do Firestore para permitir escritas.";
+                    } else {
+                        errorMessage += " Verifique a console para mais detalhes técnicos.";
+                    }
+                    showNotification(errorMessage, "error", 10000);
                 } finally {
                     UIElements.loader.classList.add('hidden');
                 }
@@ -1806,14 +1816,14 @@
                     
                     const manifestData = manifestSnap.data();
 
-                    // 2. Carregar os chunks de dados das 3 subcoleções em paralelo.
-                    const sectorChunksRef = collection(db, "shared_analyses", analysisId, "sector_chunks");
-                    const filialChunksRef = collection(db, "shared_analyses", analysisId, "filial_chunks");
+                    // 2. Carregar os dados das 3 subcoleções em paralelo.
+                    const sectorDataRef = collection(db, "shared_analyses", analysisId, "sector_data");
+                    const filialDataRef = collection(db, "shared_analyses", analysisId, "filial_data");
                     const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
 
                     const [sectorSnapshot, filialSnapshot, dataSnapshot] = await Promise.all([
-                        getDocs(sectorChunksRef),
-                        getDocs(filialChunksRef),
+                        getDocs(sectorDataRef),
+                        getDocs(filialDataRef),
                         getDocs(dataChunksRef)
                     ]);
 
@@ -1821,16 +1831,25 @@
                     const setoresData = new Map();
                     sectorSnapshot.forEach(doc => {
                         const data = doc.data();
-                        setoresData.set(data.setor, {
-                            totalQtd: data.totalQtd,
-                            products: new Map(Object.entries(data.products))
-                        });
+                        const { setor, codigo, descr, totalQtd } = data;
+                        
+                        if (!setoresData.has(setor)) {
+                            setoresData.set(setor, { totalQtd: 0, products: new Map() });
+                        }
+                        const setorInfo = setoresData.get(setor);
+                        setorInfo.products.set(codigo, { descr, totalQtd });
+                        setorInfo.totalQtd += totalQtd;
                     });
 
                     const filialData = new Map();
                     filialSnapshot.forEach(doc => {
                         const data = doc.data();
-                        filialData.set(data.rota, new Map(Object.entries(data.filiais)));
+                        const { rota, filial, unidades } = data;
+
+                        if (!filialData.has(rota)) {
+                            filialData.set(rota, new Map());
+                        }
+                        filialData.get(rota).set(filial, unidades);
                     });
                     
                     const sectorAnalysis = {
@@ -1839,10 +1858,10 @@
                         totalQuantidadeGeral: manifestData.totalQuantidadeGeral,
                         totalSkusGeral: manifestData.totalSkusGeral,
                         totalUniqueFiliais: manifestData.totalUniqueFiliais,
-                        filiaisSemFaturamento: manifestData.filiaisSemFaturamento
+                        filiaisSemFaturamento: manifestData.filiaisSemFaturamento || []
                     };
 
-                    // 4. Reconstruir o `productAnalysis.analysisData`.
+                    // 4. Reconstruir `productAnalysis.analysisData`.
                     let allAnalysisData = [];
                     if (!dataSnapshot.empty) {
                         const sortedChunks = dataSnapshot.docs.map(doc => doc.data()).sort((a, b) => a.chunkIndex - b.chunkIndex);
@@ -1852,10 +1871,10 @@
                     }
                     const productAnalysis = {
                         analysisData: allAnalysisData,
-                        productSalesDetails: new Map() // Detalhes não são carregados na vista partilhada
+                        productSalesDetails: new Map()
                     };
 
-                    // --- Renderização dos dados carregados (código igual ao que você já tinha) ---
+                    // --- Renderização dos dados carregados (código existente) ---
                     appState.processedData.sectorAnalysis = sectorAnalysis;
                     appState.processedData.productAnalysis = productAnalysis;
                     
@@ -1912,7 +1931,6 @@
                     UIElements.loader.classList.add('hidden');
                 }
             }
-
 
             function showShareLinkModal(url) {
                 const modal = document.getElementById('share-link-modal');
@@ -2194,3 +2212,5 @@
     </script>
 </body>
 </html>
+
+
