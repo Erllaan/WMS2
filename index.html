@@ -1611,7 +1611,7 @@
                                     });
                                 });
                                 doc.save('detalhes_produtos_selecionados.pdf');
-                        }
+                            }
                 });
             }
 
@@ -1704,126 +1704,7 @@
                 }
             }
             
-            async function loadAnalysisFromFirebase(analysisId) {
-                isReadOnlySharedView = true;
-                if (!db) {
-                    showNotification("Serviço de partilha indisponível.", "error");
-                    return;
-                }
-                UIElements.loader.classList.remove('hidden');
-                
-                try {
-                    // 1. Carregar o documento principal (manifesto).
-                    const manifestDocRef = doc(db, "shared_analyses", analysisId);
-                    const manifestSnap = await getDoc(manifestDocRef);
-
-                    if (manifestSnap.exists()) {
-                        const manifestData = manifestSnap.data();
-
-                        if (!manifestData.processedSectorAnalysis) {
-                            showNotification("Formato de partilha inválido ou antigo.", "error");
-                            return;
-                        }
-
-                        // 2. Carregar todos os pedaços (chunks) de dados da subcoleção.
-                        const chunksCollectionRef = collection(db, "shared_analyses", analysisId, "data_chunks");
-                        const chunksSnapshot = await getDocs(chunksCollectionRef);
-                        
-                        let allAnalysisData = [];
-                        if (!chunksSnapshot.empty) {
-                            const sortedChunks = chunksSnapshot.docs.map(doc => doc.data()).sort((a, b) => a.chunkIndex - b.chunkIndex);
-                            sortedChunks.forEach(chunk => {
-                                allAnalysisData = allAnalysisData.concat(chunk.data);
-                            });
-                        }
-
-                        // 3. Reconstruir os objetos de análise completos.
-                        const sectorAnalysis = {
-                            setoresData: new Map(Object.entries(manifestData.processedSectorAnalysis.setoresData).map(([setor, data]) => {
-                                return [setor, {
-                                    totalQtd: data.totalQtd,
-                                    products: new Map(Object.entries(data.products))
-                                }];
-                            })),
-                            filialData: new Map(Object.entries(manifestData.processedSectorAnalysis.filialData).map(([rota, filiais]) => {
-                                return [rota, new Map(Object.entries(filiais))];
-                            })),
-                            totalQuantidadeGeral: manifestData.processedSectorAnalysis.totalQuantidadeGeral,
-                            totalSkusGeral: manifestData.processedSectorAnalysis.totalSkusGeral,
-                            totalUniqueFiliais: manifestData.processedSectorAnalysis.totalUniqueFiliais,
-                            filiaisSemFaturamento: manifestData.processedSectorAnalysis.filiaisSemFaturamento
-                        };
-
-                        const productAnalysis = {
-                            analysisData: allAnalysisData,
-                            productSalesDetails: new Map() // Detalhes não são carregados na vista partilhada
-                        };
-
-                        appState.processedData.sectorAnalysis = sectorAnalysis;
-                        appState.processedData.productAnalysis = productAnalysis;
-                        
-                        // INFO: Apenas as abas de análise são mostradas na vista partilhada.
-                        document.getElementById('file-control-panel').classList.add('hidden');
-                        document.getElementById('switchToValidation').classList.add('hidden');
-                        document.getElementById('actions-container').classList.add('hidden');
-
-                        const validationBtn = UIElements.buttons.switchToValidation;
-                        const sectorBtn = UIElements.buttons.switchToSector;
-                        validationBtn.classList.remove('active');
-                        sectorBtn.classList.add('active');
-                        UIElements.views.validation.classList.add('hidden');
-                        UIElements.views.sector.classList.remove('hidden');
-
-                        showNotification('Análise partilhada carregada.', 'success');
-                        
-                        if (manifestData.lastUpdateTime) {
-                            updateTimestamp(manifestData.lastUpdateTime);
-                        }
-                        
-                        // INFO: Apenas os dados processados são carregados, não as planilhas originais.
-                        // As funções de visualização são chamadas diretamente com os dados prontos.
-                        UIElements.containers.sectorSummary.innerHTML = `
-                            <div class="geral-summary-grid">
-                                <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(sectorAnalysis.totalQuantidadeGeral)}</div></div></div>
-                                <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(sectorAnalysis.totalSkusGeral)}</div></div></div>
-                            </div>`;
-                        displaySectorResults(sectorAnalysis);
-                        
-                        UIElements.containers.productAnalysis.innerHTML = `
-                            <div id="product-top20-geral-container"></div>
-                            <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
-                            <div id="product-search-container" style="margin-top: 3rem;">
-                                <h2>Pesquisa Livre de Produtos</h2>
-                                <div class="search-container">
-                                    <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
-                                </div>
-                                <div id="product-search-results-container">
-                                        <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
-                                </div>
-                                <div id="product-search-actions" class="hidden"></div>
-                            </div>
-                        `;
-                        displayProductAnalysisResults(productAnalysis.analysisData);
-                        const productsBySector = productAnalysis.analysisData.reduce((acc, product) => {
-                            const sector = product.setor || 'N/A';
-                            if (!acc[sector]) acc[sector] = [];
-                            acc[sector].push(product);
-                            return acc;
-                        }, {});
-                        displayTop20BySector(productsBySector);
-                        setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
-
-                    } else {
-                        showNotification("Análise não encontrada. O link pode estar incorreto ou a análise foi apagada.", "error");
-                    }
-                } catch (error) {
-                    console.error("Error loading analysis from Firebase:", error);
-                    showNotification("Erro ao carregar a análise partilhada.", "error");
-                } finally {
-                    UIElements.loader.classList.add('hidden');
-                }
-            }
-
+            // ########### FUNÇÃO CORRIGIDA ###########
             async function saveAnalysisToFirebase() {
                 if (!db) {
                     showNotification("Serviço de partilha indisponível.", "error");
@@ -1834,33 +1715,17 @@
                     return;
                 }
                 UIElements.loader.classList.remove('hidden');
-                
+
                 try {
-                    // INFO: Apenas os dados processados e resumidos são preparados para a partilha.
-                    // As planilhas originais (appState.ordersData, etc.) NÃO são incluídas.
-                    const serializableSectorAnalysis = {
-                        setoresData: Object.fromEntries(
-                            [...appState.processedData.sectorAnalysis.setoresData.entries()].map(([setor, data]) => {
-                                return [setor, {
-                                    totalQtd: data.totalQtd,
-                                    products: Object.fromEntries(data.products)
-                                }];
-                            })
-                        ),
-                        filialData: Object.fromEntries(
-                            [...appState.processedData.sectorAnalysis.filialData.entries()].map(([rota, filiais]) => {
-                                return [rota, Object.fromEntries(filiais)];
-                            })
-                        ),
-                        totalQuantidadeGeral: appState.processedData.sectorAnalysis.totalQuantidadeGeral,
-                        totalSkusGeral: appState.processedData.sectorAnalysis.totalSkusGeral,
-                        totalUniqueFiliais: appState.processedData.sectorAnalysis.totalUniqueFiliais,
-                        filiaisSemFaturamento: appState.processedData.sectorAnalysis.filiaisSemFaturamento
-                    };
-                    
-                    // 1. Criar o documento principal (manifesto) SEM os dados pesados.
+                    // --- PREPARAÇÃO DOS DADOS ---
+                    const { sectorAnalysis, productAnalysis } = appState.processedData;
+
+                    // 1. Criar o documento principal (manifesto) APENAS COM METADADOS.
                     const manifestData = {
-                        processedSectorAnalysis: serializableSectorAnalysis,
+                        totalQuantidadeGeral: sectorAnalysis.totalQuantidadeGeral,
+                        totalSkusGeral: sectorAnalysis.totalSkusGeral,
+                        totalUniqueFiliais: sectorAnalysis.totalUniqueFiliais,
+                        filiaisSemFaturamento: sectorAnalysis.filiaisSemFaturamento,
                         lastUpdateTime: localStorage.getItem('lastUpdateTime') || new Date().toISOString(),
                         createdAt: new Date().toISOString()
                     };
@@ -1868,28 +1733,50 @@
                     const manifestDocRef = await addDoc(collection(db, "shared_analyses"), manifestData);
                     const analysisId = manifestDocRef.id;
 
-                    // 2. Dividir os dados pesados (analysisData) em pedaços (chunks).
-                    const analysisData = appState.processedData.productAnalysis.analysisData;
-                    const chunkSize = 2000; // Número de itens por documento para ficar abaixo do limite de 1MB.
+                    // --- DIVISÃO E ESCRITA EM LOTE (PROMISES) ---
                     const writePromises = [];
-                    const chunksCollectionRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+                    const { setoresData, filialData } = sectorAnalysis;
+                    const analysisData = productAnalysis.analysisData;
 
+                    // 2. Salvar dados de SETORES em uma subcoleção ('sector_chunks')
+                    const sectorChunksRef = collection(db, "shared_analyses", analysisId, "sector_chunks");
+                    for (const [setor, data] of setoresData.entries()) {
+                        const sectorDoc = {
+                            setor: setor,
+                            totalQtd: data.totalQtd,
+                            products: Object.fromEntries(data.products) // Converte Map para Objeto
+                        };
+                        writePromises.push(addDoc(sectorChunksRef, sectorDoc));
+                    }
+
+                    // 3. Salvar dados de FILIAIS em uma subcoleção ('filial_chunks')
+                    const filialChunksRef = collection(db, "shared_analyses", analysisId, "filial_chunks");
+                    for (const [rota, filiais] of filialData.entries()) {
+                        const filialDoc = {
+                            rota: rota,
+                            filiais: Object.fromEntries(filiais) // Converte Map para Objeto
+                        };
+                        writePromises.push(addDoc(filialChunksRef, filialDoc));
+                    }
+
+                    // 4. Salvar dados de PRODUTOS em 'data_chunks' (lógica que você já tinha)
+                    const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+                    const chunkSize = 2000;
                     for (let i = 0; i < analysisData.length; i += chunkSize) {
                         const chunk = analysisData.slice(i, i + chunkSize);
                         const chunkDoc = {
                             chunkIndex: i / chunkSize,
                             data: chunk
                         };
-                        // Adiciona a promessa de escrita ao array.
-                        writePromises.push(addDoc(chunksCollectionRef, chunkDoc));
+                        writePromises.push(addDoc(dataChunksRef, chunkDoc));
                     }
 
-                    // 3. Executar todas as escritas dos chunks em paralelo.
+                    // 5. Executar todas as operações de escrita de uma vez.
                     await Promise.all(writePromises);
-                    
+
                     const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
                     showShareLinkModal(shareUrl);
-                    
+
                 } catch (error) {
                     console.error("Error saving analysis to Firebase:", error);
                     showNotification("Erro ao guardar a análise para partilha. Verifique a console para mais detalhes.", "error");
@@ -1897,6 +1784,135 @@
                     UIElements.loader.classList.add('hidden');
                 }
             }
+
+            // ########### FUNÇÃO CORRIGIDA ###########
+            async function loadAnalysisFromFirebase(analysisId) {
+                isReadOnlySharedView = true;
+                if (!db) {
+                    showNotification("Serviço de partilha indisponível.", "error");
+                    return;
+                }
+                UIElements.loader.classList.remove('hidden');
+
+                try {
+                    // 1. Carregar o documento principal (manifesto).
+                    const manifestDocRef = doc(db, "shared_analyses", analysisId);
+                    const manifestSnap = await getDoc(manifestDocRef);
+
+                    if (!manifestSnap.exists()) {
+                        showNotification("Análise não encontrada. O link pode estar incorreto.", "error");
+                        return;
+                    }
+                    
+                    const manifestData = manifestSnap.data();
+
+                    // 2. Carregar os chunks de dados das 3 subcoleções em paralelo.
+                    const sectorChunksRef = collection(db, "shared_analyses", analysisId, "sector_chunks");
+                    const filialChunksRef = collection(db, "shared_analyses", analysisId, "filial_chunks");
+                    const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+
+                    const [sectorSnapshot, filialSnapshot, dataSnapshot] = await Promise.all([
+                        getDocs(sectorChunksRef),
+                        getDocs(filialChunksRef),
+                        getDocs(dataChunksRef)
+                    ]);
+
+                    // 3. Reconstruir o objeto `sectorAnalysis`.
+                    const setoresData = new Map();
+                    sectorSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        setoresData.set(data.setor, {
+                            totalQtd: data.totalQtd,
+                            products: new Map(Object.entries(data.products))
+                        });
+                    });
+
+                    const filialData = new Map();
+                    filialSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        filialData.set(data.rota, new Map(Object.entries(data.filiais)));
+                    });
+                    
+                    const sectorAnalysis = {
+                        setoresData,
+                        filialData,
+                        totalQuantidadeGeral: manifestData.totalQuantidadeGeral,
+                        totalSkusGeral: manifestData.totalSkusGeral,
+                        totalUniqueFiliais: manifestData.totalUniqueFiliais,
+                        filiaisSemFaturamento: manifestData.filiaisSemFaturamento
+                    };
+
+                    // 4. Reconstruir o `productAnalysis.analysisData`.
+                    let allAnalysisData = [];
+                    if (!dataSnapshot.empty) {
+                        const sortedChunks = dataSnapshot.docs.map(doc => doc.data()).sort((a, b) => a.chunkIndex - b.chunkIndex);
+                        sortedChunks.forEach(chunk => {
+                            allAnalysisData = allAnalysisData.concat(chunk.data);
+                        });
+                    }
+                    const productAnalysis = {
+                        analysisData: allAnalysisData,
+                        productSalesDetails: new Map() // Detalhes não são carregados na vista partilhada
+                    };
+
+                    // --- Renderização dos dados carregados (código igual ao que você já tinha) ---
+                    appState.processedData.sectorAnalysis = sectorAnalysis;
+                    appState.processedData.productAnalysis = productAnalysis;
+                    
+                    document.getElementById('file-control-panel').classList.add('hidden');
+                    document.getElementById('switchToValidation').classList.add('hidden');
+                    document.getElementById('actions-container').classList.add('hidden');
+
+                    UIElements.buttons.switchToValidation.classList.remove('active');
+                    UIElements.buttons.switchToSector.classList.add('active');
+                    UIElements.views.validation.classList.add('hidden');
+                    UIElements.views.sector.classList.remove('hidden');
+
+                    showNotification('Análise partilhada carregada.', 'success');
+                    
+                    if (manifestData.lastUpdateTime) {
+                        updateTimestamp(manifestData.lastUpdateTime);
+                    }
+                    
+                    UIElements.containers.sectorSummary.innerHTML = `
+                        <div class="geral-summary-grid">
+                            <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(sectorAnalysis.totalQuantidadeGeral)}</div></div></div>
+                            <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(sectorAnalysis.totalSkusGeral)}</div></div></div>
+                        </div>`;
+                    displaySectorResults(sectorAnalysis);
+                    
+                    UIElements.containers.productAnalysis.innerHTML = `
+                        <div id="product-top20-geral-container"></div>
+                        <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
+                        <div id="product-search-container" style="margin-top: 3rem;">
+                            <h2>Pesquisa Livre de Produtos</h2>
+                            <div class="search-container">
+                                <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
+                            </div>
+                            <div id="product-search-results-container">
+                                <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
+                            </div>
+                            <div id="product-search-actions" class="hidden"></div>
+                        </div>
+                    `;
+                    displayProductAnalysisResults(productAnalysis.analysisData);
+                    const productsBySector = productAnalysis.analysisData.reduce((acc, product) => {
+                        const sector = product.setor || 'N/A';
+                        if (!acc[sector]) acc[sector] = [];
+                        acc[sector].push(product);
+                        return acc;
+                    }, {});
+                    displayTop20BySector(productsBySector);
+                    setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
+
+                } catch (error) {
+                    console.error("Error loading analysis from Firebase:", error);
+                    showNotification("Erro ao carregar a análise partilhada.", "error");
+                } finally {
+                    UIElements.loader.classList.add('hidden');
+                }
+            }
+
 
             function showShareLinkModal(url) {
                 const modal = document.getElementById('share-link-modal');
@@ -2178,4 +2194,3 @@
     </script>
 </body>
 </html>
-
