@@ -51,7 +51,7 @@
             width: 100%;
             max-width: 100%;
             margin: 0;
-            background: var(--card-background);
+            background: var(--background-color);
             padding: 1rem;
             border-radius: 0;
             box-shadow: none;
@@ -60,19 +60,30 @@
             box-sizing: border-box;
         }
 
+        .content-section {
+            background-color: var(--card-background);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
         h2 {
             border-bottom-width: 2px;
             border-bottom-style: solid;
             padding-bottom: 0.75rem;
-            margin-top: 2rem;
+            margin-top: 0; /* Adjusted for content-section */
             margin-bottom: 1rem;
             font-size: 1.3em;
             font-weight: 600;
         }
 
-        #validation-view h2 { color: var(--primary-color); border-bottom-color: var(--primary-light); }
-        #sector-view h2 { color: var(--sector-primary); border-bottom-color: var(--sector-light); }
-        #product-view h2 { color: var(--product-primary); border-bottom-color: var(--product-light); }
+        #validation-section h2 { color: var(--primary-color); border-bottom-color: var(--primary-light); }
+        #sector-section h2 { color: var(--sector-primary); border-bottom-color: var(--sector-light); }
+        #product-section h2 { color: var(--product-primary); border-bottom-color: var(--product-light); }
+        #label-section h2 { color: var(--sector-primary); border-bottom-color: var(--sector-light); }
+        #filial-section h2 { color: var(--sector-primary); border-bottom-color: var(--sector-light); }
+        #no-billing-section h2 { color: var(--error-color); border-bottom-color: #f5c6cb; }
 
         .file-inputs-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
         .file-drop-area { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border-color); padding: 1.5rem; border-radius: var(--border-radius); width: 100%; box-sizing: border-box; background-color: #fcfdff; cursor: pointer; transition: border-color 0.3s, background-color 0.3s; text-align: center; height: 100%; }
@@ -86,9 +97,8 @@
             flex-direction: column;
             align-items: stretch;
             gap: 1rem;
-            margin-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            padding: 2rem 1rem 1rem;
+            margin-top: 1.5rem;
+            padding: 0;
         }
 
         .action-btn {
@@ -129,12 +139,13 @@
 
         .hidden { display: none !important; }
 
-        #last-updated-container { text-align: right; margin: 1.5rem 0; font-size: 0.8em; color: var(--text-light); display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        #last-updated-container { text-align: center; margin-bottom: 1rem; font-size: 0.8em; color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 
         .summary-card { padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1.5rem; border-left: 5px solid; box-shadow: var(--shadow); }
-        #validation-view .summary-card { background-color: var(--primary-light); border-color: var(--primary-color); color: var(--primary-color); }
-        #sector-view .summary-card { background-color: var(--sector-light); border-color: var(--sector-primary); color: var(--sector-primary); }
-        #product-view .summary-card { background-color: var(--product-light); border-color: var(--product-primary); color: var(--product-primary); }
+        #validation-section .summary-card { background-color: var(--primary-light); border-color: var(--primary-color); color: var(--primary-color); }
+        #sector-section .summary-card, #filial-section .summary-card { background-color: var(--sector-light); border-color: var(--sector-primary); color: var(--sector-primary); }
+        #product-section .summary-card { background-color: var(--product-light); border-color: var(--product-primary); color: var(--product-primary); }
+        #no-billing-section .summary-card { background-color: #f8d7da; border-color: var(--error-color); color: #721c24; }
         
         .summary-card h2 { margin-top: 0; font-size: 1.1em; background: none; box-shadow: none; padding: 0; color: inherit; border: none; font-weight: 500; }
         .summary-card p { font-size: 1.3em; font-weight: 700; margin: 0.5rem 0 0; }
@@ -255,23 +266,34 @@
             .container {
                 max-width: 1600px;
                 margin: 10px auto;
-                padding: 1.5rem;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow);
-                border: 1px solid #e9ecef;
+                padding: 0;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+            }
+
+            .content-section {
+                 padding: 1.5rem;
+                 margin-bottom: 2rem;
             }
 
             h2 {
-                margin-top: 2.5rem;
+                margin-top: 0;
                 margin-bottom: 1.5rem;
                 font-size: 1.6em;
+            }
+
+            #file-control-panel {
+                margin: 10px auto;
+                max-width: 1600px;
             }
 
             .actions-container {
                 flex-direction: row;
                 justify-content: center;
                 align-items: center;
-                padding: 2rem;
+                padding: 2rem 0;
+                margin-top: 0;
             }
 
             .action-btn {
@@ -360,14 +382,13 @@
     <div class="container">
         <div id="loader" class="loader-overlay hidden"><div class="loader-spinner"></div>A processar...</div>
 
-        <div id="last-updated-container" class="hidden"></div>
-
-        <div id="file-control-panel" class="open">
+        <div id="file-control-panel" class="content-section open">
             <div id="file-control-header">
                 <h3>Painel de Ficheiros</h3>
                 <span class="toggle-icon">▲</span>
             </div>
             <div id="file-control-content">
+                <div id="last-updated-container" class="hidden"></div>
                 <h4>Carregar Planilhas</h4>
                 <div class="file-inputs-container">
                     <label for="ordersFileInput" id="ordersFileInputArea" class="file-drop-area">
@@ -404,63 +425,79 @@
                         <p><strong>Importar Relatório Partilhado</strong><br>(Ficheiro .json)</p>
                     </label>
                 </div>
+                <div id="actions-container" class="actions-container hidden">
+                        <button id="reload-files-btn" class="action-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 7.24 4.12M3.51 15A9 9 0 0 0 16.76 19.88"></path></svg>
+                        Limpar e Recomeçar
+                    </button>
+                    <button id="export-data-btn" class="action-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Partilhar Ficheiro (.json)
+                    </button>
+                    <button id="daily-report-btn" class="action-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+                        Gerar Relatório Diário (Excel)
+                    </button>
+                        <button id="share-online-btn" class="action-btn" style="background-color: var(--product-primary); color: white; border-color: var(--product-primary);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        Partilhar Online
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div id="analysis-content">
+        <div id="full-analysis-container" class="hidden">
             <!-- ABA 1: VALIDAÇÃO DE PEDIDOS -->
-            <div id="validation-view">
+            <div id="validation-section" class="content-section">
                 <h2>Validação de Pedidos</h2>
                 <div id="validation-summary-container"></div>
                 <div id="validation-results-container"></div>
             </div>
 
-            <!-- ABA 2: ANÁLISE POR SETOR -->
-            <div id="sector-view">
+            <!-- Resumo Geral -->
+            <div id="general-summary-section" class="content-section">
                  <div id="sector-summary-container"></div>
-                 <div id="sector-results-container"></div>
+            </div>
+
+            <!-- ABA 2: ANÁLISE POR SETOR -->
+            <div id="sector-section" class="content-section">
+                <h2>Acompanhamento por Setor</h2>
+                <div id="sector-results-container"></div>
+            </div>
+
+             <!-- NOVA SEÇÃO: ETIQUETAS -->
+            <div id="label-section" class="content-section">
+                <div id="label-analysis-container"></div>
+            </div>
+            
+            <!-- NOVA SEÇÃO: FILIAIS -->
+            <div id="filial-section" class="content-section">
+                 <div id="filial-analysis-container"></div>
+            </div>
+            
+             <!-- NOVA SEÇÃO: SEM FATURAMENTO -->
+            <div id="no-billing-section" class="content-section">
+                 <div id="no-billing-container"></div>
             </div>
 
             <!-- ABA 3: ACOMPANHAMENTO DE PRODUTOS -->
-            <div id="product-view">
-                <div id="product-analysis-container">
-                    <div id="product-top20-geral-container">
-                        <div class="placeholder-card"><p>Carregue a <strong>Planilha de Itens</strong> para ver o ranking de SKUs.</p></div>
+            <div id="product-section" class="content-section">
+                <div id="product-top20-geral-container"></div>
+                <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
+                <div id="product-search-container" style="margin-top: 3rem;">
+                    <h2>Pesquisa Livre de Produtos</h2>
+                    <div class="search-container">
+                        <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
                     </div>
-
-                    <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
-                    
-                    <div id="product-search-container" style="margin-top: 3rem;">
-                        <h2>Pesquisa Livre de Produtos</h2>
-                        <div class="search-container">
-                            <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
-                        </div>
-                        <div id="product-search-results-container">
-                            <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
-                        </div>
-                            <div id="product-search-actions" class="hidden"></div>
+                    <div id="product-search-results-container">
+                        <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
                     </div>
+                        <div id="product-search-actions" class="hidden"></div>
                 </div>
             </div>
         </div>
-        
-        <div id="actions-container" class="actions-container hidden">
-                <button id="reload-files-btn" class="action-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 7.24 4.12M3.51 15A9 9 0 0 0 16.76 19.88"></path></svg>
-                Limpar e Recomeçar
-            </button>
-            <button id="export-data-btn" class="action-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Partilhar Ficheiro (.json)
-            </button>
-            <button id="daily-report-btn" class="action-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
-                Gerar Relatório Diário (Excel)
-            </button>
-                <button id="share-online-btn" class="action-btn" style="background-color: var(--product-primary); color: white; border-color: var(--product-primary);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                Partilhar Online
-            </button>
+        <div id="initial-placeholder" class="content-section">
+            <div class="placeholder-card" style="margin-top:0;"><p>Carregue uma ou mais planilhas no <strong>Painel de Ficheiros</strong> para iniciar a análise.</p></div>
         </div>
     </div>
 
@@ -516,10 +553,9 @@
         (function() {
             // --- Firebase Initialization ---
             let db, auth;
-            let firebaseErrorContainer; // Variavel para o container de erro
+            let firebaseErrorContainer; 
 
             try {
-                // Objeto de configuração do Firebase atualizado conforme a aplicação "Your Trainer Partner"
                 const firebaseConfig = {
                     apiKey: "AIzaSyDr544e43_iKWNVL9UCKdKONM_s9_gGxTs",
                     authDomain: "sample-firebase-ai-app-7c4b8.firebaseapp.com",
@@ -535,33 +571,21 @@
                     db = getFirestore(app);
                     signInAnonymously(auth).catch(error => {
                         console.error("Firebase anonymous sign-in failed:", error);
-                        
                         if (UIElements.buttons.shareOnline) {
                             UIElements.buttons.shareOnline.disabled = true;
                             UIElements.buttons.shareOnline.style.cursor = 'not-allowed';
                             UIElements.buttons.shareOnline.style.opacity = '0.6';
                             UIElements.buttons.shareOnline.title = "A partilha online está desativada devido a um erro de configuração.";
                         }
-
                         if (error.code === 'auth/admin-restricted-operation') {
                             showNotification("AÇÃO NECESSÁRIA: Ative a Autenticação Anónima no seu projeto Firebase.", "error", 15000);
-                            // Exibe a mensagem de erro permanente
-                            if(firebaseErrorContainer) {
-                                firebaseErrorContainer.innerHTML = `<strong>Erro de Configuração Firebase:</strong> A partilha online está desativada. Por favor, aceda ao seu <a href="https://console.firebase.google.com/" target="_blank" style="text-decoration: underline; font-weight: bold;">Painel Firebase</a>, vá a <strong>Authentication > Sign-in method</strong> e ative o fornecedor <strong>Anónimo</strong>.`;
-                                firebaseErrorContainer.classList.remove('hidden');
-                            }
                         } else {
                             showNotification("Não foi possível conectar ao serviço de partilha.", "error");
                         }
                     });
                 } else {
-                    console.error("Firebase config não encontrada ou não preenchida. As funcionalidades de partilha online estarão desativadas.");
-                    if (UIElements.buttons.shareOnline) {
-                        UIElements.buttons.shareOnline.disabled = true;
-                        UIElements.buttons.shareOnline.style.cursor = 'not-allowed';
-                        UIElements.buttons.shareOnline.style.opacity = '0.6';
-                        UIElements.buttons.shareOnline.title = "A partilha online está desativada. Insira as suas chaves Firebase no código.";
-                    }
+                    console.error("Firebase config não encontrada ou não preenchida.");
+                    if (UIElements.buttons.shareOnline) UIElements.buttons.shareOnline.disabled = true;
                 }
             } catch (error) {
                 console.error("A inicialização do Firebase falhou:", error);
@@ -586,7 +610,7 @@
             const customOrder = ["AL FRAGIL", "AL BIG", "Alimentos", "Antibioticos", "MED BIG", "Medicamento 1", "Medicamento 2", "P1 BIG", "Perfumaria 1", "P2 BIG", "Perfumaria 2", "Perfumaria 3", "Piscotropicos", "SEM GIRO", "Romaneio", "Fralda", "Termolabeis", "Volumosos", "Visados", "Visados 2", "Baixo Giro", "Especial"];
             const orderMap = new Map(customOrder.map((name, index) => [name.toUpperCase(), index]));
             const getOrder = (sectorName) => orderMap.get(sectorName.toUpperCase()) ?? Infinity;
-            // Define os setores que são separados por etiqueta/QMS
+            // CORRIGIDO: Adicionado abreviações FR e RM
             const labelSectors = new Set(['P1 BIG', 'P2 BIG', 'FRALDA', 'FR', 'MED BIG', 'ROMANEIO', 'RM', 'AL BIG']);
 
 
@@ -594,11 +618,6 @@
                 notification: document.getElementById('notification'),
                 loader: document.getElementById('loader'),
                 lastUpdatedContainer: document.getElementById('last-updated-container'),
-                views: {
-                    validation: document.getElementById('validation-view'),
-                    sector: document.getElementById('sector-view'),
-                    product: document.getElementById('product-view')
-                },
                 buttons: {
                     reloadFiles: document.getElementById('reload-files-btn'),
                     exportData: document.getElementById('export-data-btn'),
@@ -626,14 +645,26 @@
                     validationResults: document.getElementById('validation-results-container'),
                     sectorSummary: document.getElementById('sector-summary-container'),
                     sectorResults: document.getElementById('sector-results-container'),
-                    productAnalysis: document.getElementById('product-analysis-container'),
                     actions: document.getElementById('actions-container'),
-                    fullReport: document.getElementById('full-report-container')
+                    fullAnalysis: document.getElementById('full-analysis-container'),
+                    initialPlaceholder: document.getElementById('initial-placeholder'),
+                    labelAnalysis: document.getElementById('label-analysis-container'),
+                    filialAnalysis: document.getElementById('filial-analysis-container'),
+                    noBilling: document.getElementById('no-billing-container')
                 },
                 fileControl: {
                     panel: document.getElementById('file-control-panel'),
                     header: document.getElementById('file-control-header'),
                     icon: document.querySelector('#file-control-header .toggle-icon')
+                },
+                sections: {
+                    validation: document.getElementById('validation-section'),
+                    generalSummary: document.getElementById('general-summary-section'),
+                    sector: document.getElementById('sector-section'),
+                    label: document.getElementById('label-section'),
+                    filial: document.getElementById('filial-section'),
+                    noBilling: document.getElementById('no-billing-section'),
+                    product: document.getElementById('product-section'),
                 }
             };
 
@@ -722,7 +753,7 @@
                     UIElements.dropAreas.orders.classList.add('loaded');
                     UIElements.containers.actions.classList.remove('hidden');
                     updateTimestamp();
-                    runValidationAnalysis();
+                    runAllAnalyses();
                 });
             }
 
@@ -746,7 +777,7 @@
                     UIElements.dropAreas.status.classList.add('loaded');
                     UIElements.containers.actions.classList.remove('hidden');
                     updateTimestamp();
-                    runValidationAnalysis();
+                    runAllAnalyses();
                 });
             }
 
@@ -763,8 +794,7 @@
                     UIElements.dropAreas.sector.classList.add('loaded');
                     UIElements.containers.actions.classList.remove('hidden');
                     updateTimestamp();
-                    runSectorAnalysis();
-                    runProductAnalysis();
+                    runAllAnalyses();
                 });
             }
 
@@ -786,8 +816,7 @@
                     UIElements.dropAreas.address.classList.add('loaded');
                     UIElements.containers.actions.classList.remove('hidden');
                     updateTimestamp();
-                    runSectorAnalysis();
-                    runProductAnalysis();
+                    runAllAnalyses();
                 });
             }
             
@@ -811,15 +840,13 @@
                     UIElements.dropAreas.productMaster.classList.add('loaded');
                     UIElements.containers.actions.classList.remove('hidden');
                     updateTimestamp();
-                    runProductAnalysis();
-                    runSectorAnalysis(); // Re-run sector analysis to update labels
+                    runAllAnalyses();
                 });
             }
 
             function handleSharedFile(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = e => {
                     try {
@@ -840,10 +867,46 @@
                     panelHasBeenAutoClosed = true;
                 }
             }
+
+            function runAllAnalyses() {
+                const hasOrders = appState.ordersData.length > 0;
+                const hasStatus = appState.nonReturnedOrders.size > 0;
+                const hasItems = appState.sectorData.length > 0;
+
+                UIElements.containers.initialPlaceholder.classList.add('hidden');
+                UIElements.containers.fullAnalysis.classList.remove('hidden');
+
+                if (hasOrders && hasStatus) {
+                    runValidationAnalysis();
+                    UIElements.sections.validation.classList.remove('hidden');
+                } else {
+                    UIElements.sections.validation.classList.add('hidden');
+                }
+
+                if (hasItems) {
+                    runSectorAnalysis();
+                    runProductAnalysis();
+                    UIElements.sections.generalSummary.classList.remove('hidden');
+                    UIElements.sections.sector.classList.remove('hidden');
+                    UIElements.sections.label.classList.remove('hidden');
+                    UIElements.sections.filial.classList.remove('hidden');
+                    UIElements.sections.noBilling.classList.remove('hidden');
+                    UIElements.sections.product.classList.remove('hidden');
+                } else {
+                    UIElements.sections.generalSummary.classList.add('hidden');
+                    UIElements.sections.sector.classList.add('hidden');
+                    UIElements.sections.label.classList.add('hidden');
+                    UIElements.sections.filial.classList.add('hidden');
+                    UIElements.sections.noBilling.classList.add('hidden');
+                    UIElements.sections.product.classList.add('hidden');
+                }
+            }
             
             function runValidationAnalysis() {
-                if (appState.ordersData.length === 0 || appState.nonReturnedOrders.size === 0) {
+                // ... same logic as before ...
+                 if (appState.ordersData.length === 0 || appState.nonReturnedOrders.size === 0) {
                     UIElements.containers.validationResults.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Pedidos</strong> e a <strong>Planilha de Status</strong> para iniciar a validação.</p></div>`;
+                    UIElements.containers.validationSummary.innerHTML = '';
                     return;
                 }
                 
@@ -857,60 +920,38 @@
                         <div class="summary-card" style="background-color: var(--warning-light); border-color: var(--warning-color); color: var(--warning-dark); text-align: left;">
                             <style> .summary-card ul { font-size: 0.9em; margin-top: 1rem; list-style-position: inside; padding-left: 0;} .summary-card li { margin-bottom: 0.5rem; } </style>
                             <h2>Nenhum Pedido Pendente Encontrado</h2>
-                            <p style="font-size: 1em; font-weight: 500;">A análise não retornou resultados. Por favor, verifique se:</p>
-                            <ul>
-                                <li>A coluna <strong>'C. Legado'</strong> na "Planilha de Pedidos" corresponde exatamente à coluna <strong>'Pedido Final'</strong> na "Planilha de Status".</li>
-                                <li>Realmente existem pedidos com o status <strong>'NÃO RETORNADO'</strong> que também estão presentes na "Planilha de Pedidos".</li>
-                            </ul>
+                            <p style="font-size: 1em; font-weight: 500;">A análise não retornou resultados.</p>
                         </div>`;
                     UIElements.containers.validationResults.innerHTML = '';
                     autoClosePanel();
                     return;
                 }
                 const uniquePendingOrders = new Set(filteredData.map(row => String(row['C. Legado'] || '').trim()));
-
                 const rotasData = {};
                 let totalUnidades = 0;
-
                 for (const row of filteredData) {
                     const quantidade = parseFloat(row['Tot'] || row['Sum Qtd Solicitada'] || 0);
                     const pedidoLegado = String(row['C. Legado'] || '').trim();
                     if (isNaN(quantidade) || !pedidoLegado) continue;
-
                     totalUnidades += quantidade;
-                    
                     const clienteField = String(row['Cliente'] || '').trim();
                     const codigoLoja = clienteField.split('-')[0].trim();
                     let rotaOriginal = String(row['Rota'] || 'N/A').trim();
                     const storeInfo = masterStoreList.get(codigoLoja);
-                    
                     if (storeInfo && rotaOriginal === '916') rotaOriginal = storeInfo.rota;
                     const nomeLoja = storeInfo ? storeInfo.name : clienteField.split('-').slice(1).join('-').trim() || 'N/A';
-
                     if (!rotasData[rotaOriginal]) rotasData[rotaOriginal] = { pedidos: [] };
-                    
-                    rotasData[rotaOriginal].pedidos.push({
-                        codigo: codigoLoja,
-                        nome: nomeLoja,
-                        pedido: pedidoLegado,
-                        qtd: quantidade
-                    });
+                    rotasData[rotaOriginal].pedidos.push({ codigo: codigoLoja, nome: nomeLoja, pedido: pedidoLegado, qtd: quantidade });
                 }
-
-                UIElements.containers.validationSummary.innerHTML = `
-                    <div class="summary-card" style="background-color: var(--warning-light); border-color: var(--warning-color); color: var(--warning-dark);">
-                        <h2>Resultado da Validação</h2>
-                        <p>${uniquePendingOrders.size} pedidos pendentes, totalizando ${Math.round(totalUnidades)} unidades.</p>
-                    </div>`;
-                
+                UIElements.containers.validationSummary.innerHTML = `<div class="summary-card"><p>${uniquePendingOrders.size} pedidos pendentes, totalizando ${Math.round(totalUnidades)} unidades.</p></div>`;
                 displayValidationRouteResults(rotasData, UIElements.containers.validationResults);
                 autoClosePanel();
             }
 
             function runSectorAnalysis() {
+                // ... same logic as before ...
                 if (appState.sectorData.length === 0) {
-                    UIElements.containers.sectorResults.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Itens</strong> para iniciar a análise.</p></div>`;
-                    UIElements.containers.sectorSummary.innerHTML = '';
+                    // Hide sections if no data
                     return;
                 }
 
@@ -935,9 +976,7 @@
                         const storeInfo = masterStoreList.get(codigoLoja);
                         const nomeLoja = storeInfo ? storeInfo.name : (String(row['Nome da Loja'] || '').trim() || 'N/A');
                         if (storeInfo && rota === '916') rota = storeInfo.rota;
-
                         if (!filialData.has(rota)) filialData.set(rota, new Map());
-                        
                         const filiaisDaRota = filialData.get(rota);
                         const filialKey = `${codigoLoja} - ${nomeLoja}`;
                         filiaisDaRota.set(filialKey, (filiaisDaRota.get(filialKey) || 0) + quantidade);
@@ -947,76 +986,48 @@
                     if (address) { 
                         const setor = address.split('.')[0];
                         const descr = String(row['Descr'] || 'N/A').trim();
-
                         if (!setoresData.has(setor)) setoresData.set(setor, { totalQtd: 0, products: new Map(), totalLabels: 0 });
-                        
                         const setorInfo = setoresData.get(setor);
                         setorInfo.totalQtd += quantidade;
                         const productInfo = setorInfo.products.get(itemCode) || { descr: descr, totalQtd: 0 };
                         productInfo.totalQtd += quantidade;
                         setorInfo.products.set(itemCode, productInfo);
-
-                        // Calcular etiquetas para setores específicos
                         if (labelSectors.has(setor.toUpperCase())) {
-                            const qms = appState.productMasterData.get(itemCode) || 1; // Usa QMS do cadastro, ou 1 como padrão
+                            const qms = appState.productMasterData.get(itemCode) || 1;
                             if (qms > 0) {
-                                // Usa Math.ceil para garantir que qualquer quantidade, mesmo que pequena, gere pelo menos 1 etiqueta.
                                 setorInfo.totalLabels += Math.ceil(quantidade / qms);
                             }
                         }
                     }
                 }
-                
                 const totalUniqueFiliais = filiaisComFaturamento.size;
                 const filiaisSemFaturamento = [];
                 for (const [storeCode, storeInfo] of masterStoreList.entries()) {
-                    if (!filiaisComFaturamento.has(storeCode)) {
-                        filiaisSemFaturamento.push(`${storeCode} - ${storeInfo.name}`);
-                    }
+                    if (!filiaisComFaturamento.has(storeCode)) filiaisSemFaturamento.push(`${storeCode} - ${storeInfo.name}`);
                 }
                 
                 appState.processedData.sectorAnalysis = { setoresData, filialData, totalQuantidadeGeral: totalQuantidade, totalSkusGeral: totalSkus.size, totalUniqueFiliais, filiaisSemFaturamento };
-
                 UIElements.containers.sectorSummary.innerHTML = `
-                        <div class="geral-summary-grid">
-                                <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(totalQuantidade)}</div></div></div>
-                                <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(totalSkus.size)}</div></div></div>
-                        </div>`;
-                
+                    <div class="geral-summary-grid">
+                        <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(totalQuantidade)}</div></div></div>
+                        <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(totalSkus.size)}</div></div></div>
+                    </div>`;
                 displaySectorResults(appState.processedData.sectorAnalysis);
                 autoClosePanel();
             }
 
             function runProductAnalysis() {
-                if (appState.sectorData.length === 0) {
-                    UIElements.containers.productAnalysis.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Itens</strong> para visualizar a análise de produtos.</p></div>`;
+                // ... same logic as before ...
+                 if (appState.sectorData.length === 0) {
                     return;
                 }
-
-                UIElements.containers.productAnalysis.innerHTML = `
-                    <div id="product-top20-geral-container"></div>
-                    <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
-                    <div id="product-search-container" style="margin-top: 3rem;">
-                        <h2>Pesquisa Livre de Produtos</h2>
-                        <div class="search-container">
-                            <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
-                        </div>
-                        <div id="product-search-results-container">
-                                <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
-                        </div>
-                        <div id="product-search-actions" class="hidden"></div>
-                    </div>
-                `;
-
                 const productQuantities = new Map();
                 const productDescriptions = new Map();
                 const productSalesDetails = new Map();
-
                 for (const row of appState.sectorData) {
                     const code = normalizeCode(row['Item']);
                     const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
                     const descr = String(row['Descr'] || 'N/A').trim();
-
                     if (code && !isNaN(qty)) {
                         productQuantities.set(code, (productQuantities.get(code) || 0) + qty);
                         if (!productDescriptions.has(code)) productDescriptions.set(code, descr);
@@ -1024,46 +1035,30 @@
                         productSalesDetails.get(code).push(row);
                     }
                 }
-                
                 const totalGeralUnidades = [...productQuantities.values()].reduce((sum, qty) => sum + qty, 0);
-
                 const analysisData = [...productQuantities.entries()].map(([code, unidades]) => {
                     const qms = appState.productMasterData.get(code) || 1;
                     const address = appState.addressData.get(code) || 'N/A';
                     const setor = address !== 'N/A' ? address.split('.')[0] : 'N/A';
-                    return {
-                        codigo: code,
-                        skus: productDescriptions.get(code) || 'N/A',
-                        unidades: unidades,
-                        qms: qms,
-                        cx: qms > 0 ? unidades / qms : 0,
-                        percent: totalGeralUnidades > 0 ? (unidades / totalGeralUnidades) * 100 : 0,
-                        setor: setor,
-                        posicao: address
-                    };
+                    return { codigo: code, skus: productDescriptions.get(code) || 'N/A', unidades: unidades, qms: qms, cx: qms > 0 ? unidades / qms : 0, percent: totalGeralUnidades > 0 ? (unidades / totalGeralUnidades) * 100 : 0, setor: setor, posicao: address };
                 });
-
                 analysisData.sort((a, b) => b.unidades - a.unidades);
-                
                 appState.processedData.productAnalysis = { analysisData, productSalesDetails };
-
                 displayProductAnalysisResults(analysisData);
-
                 const productsBySector = analysisData.reduce((acc, product) => {
                     const sector = product.setor || 'N/A';
                     if (!acc[sector]) acc[sector] = [];
                     acc[sector].push(product);
                     return acc;
                 }, {});
-
                 displayTop20BySector(productsBySector);
                 setupProductSearch(analysisData, productSalesDetails);
             }
             
             function displayValidationRouteResults(rotasData, container) {
+                // ... same as before
                 container.innerHTML = "";
                 const sortedRotas = Object.keys(rotasData).sort((a, b) => Number(a) - Number(b));
-
                 sortedRotas.forEach(rota => {
                     const rotaInfo = rotasData[rota];
                     const totalPedidosCount = rotaInfo.pedidos.length;
@@ -1071,9 +1066,7 @@
                     const accordionItem = document.createElement('div');
                     accordionItem.className = 'rota-accordion-item';
                     rotaInfo.pedidos.sort((a, b) => a.pedido.localeCompare(b.pedido, undefined, { numeric: true }));
-
                     const tableRows = rotaInfo.pedidos.map(p => `<tr><td>${p.codigo}</td><td>${p.nome}</td><td>${p.pedido}</td><td>${Math.round(p.qtd)}</td></tr>`).join('');
-
                     accordionItem.innerHTML = `
                         <div class="rota-accordion-header">
                             <h2>Rota ${rota}</h2>
@@ -1092,17 +1085,23 @@
                                 </table>
                             </div>
                         </div>`;
-                    
                     accordionItem.querySelector('.rota-accordion-header').addEventListener('click', () => accordionItem.classList.toggle('open'));
                     container.appendChild(accordionItem);
                 });
             }
 
             function displaySectorResults({ setoresData, filialData, totalQuantidadeGeral, totalSkusGeral, totalUniqueFiliais, filiaisSemFaturamento }) {
-                const container = UIElements.containers.sectorResults;
-                container.innerHTML = '';
+                const sectorContainer = UIElements.containers.sectorResults;
+                const labelContainer = UIElements.containers.labelAnalysis;
+                const filialContainer = UIElements.containers.filialAnalysis;
+                const noBillingContainer = UIElements.containers.noBilling;
+
+                sectorContainer.innerHTML = '';
+                labelContainer.innerHTML = '';
+                filialContainer.innerHTML = '';
+                noBillingContainer.innerHTML = '';
                 
-                const sectorSection = document.createElement('div');
+                // --- Sector Analysis ---
                 if (setoresData.size > 0) {
                     const sectorsByUnits = [...setoresData.entries()].sort((a, b) => b[1].totalQtd - a[1].totalQtd);
                     const threatMap = new Map();
@@ -1113,239 +1112,95 @@
                         else if (index < mediumThreatCount) threatMap.set(setor, 'threat-medium');
                         else threatMap.set(setor, 'threat-low');
                     });
-                    
                     const sortedSetores = [...setoresData.entries()].sort((a, b) => getOrder(a[0]) - getOrder(b[0]) || a[0].localeCompare(b[0]));
-
-                    const tableRows = sortedSetores.map(([setor, data]) => `
-                        <tr class="${threatMap.get(setor) || 'threat-low'}">
-                            <td class="col-setor">${setor}</td>
-                            <td class="col-unidades">${formatNumber(data.totalQtd)}</td>
-                            <td class="col-skus">${formatNumber(data.products.size)}</td>
-                            <td class="col-percent">${(totalQuantidadeGeral > 0 ? (data.totalQtd / totalQuantidadeGeral) * 100 : 0).toFixed(1).replace('.', ',')}%</td>
-                        </tr>`).join('');
-                    
+                    const tableRows = sortedSetores.map(([setor, data]) => `<tr class="${threatMap.get(setor) || 'threat-low'}"><td class="col-setor">${setor}</td><td class="col-unidades">${formatNumber(data.totalQtd)}</td><td class="col-skus">${formatNumber(data.products.size)}</td><td class="col-percent">${(totalQuantidadeGeral > 0 ? (data.totalQtd / totalQuantidadeGeral) * 100 : 0).toFixed(1).replace('.', ',')}%</td></tr>`).join('');
                     const totalPercent = sortedSetores.reduce((sum, [, data]) => sum + (data.totalQtd / totalQuantidadeGeral), 0) * 100;
-
-                    sectorSection.innerHTML = `
-                        <h2>Acompanhamento por Setor</h2>
-                        <button class="copy-image-btn" data-target="#sector-analysis-table-wrapper" data-filename="analise_por_setor.png">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                                Copiar como Imagem
-                        </button>
-                        <div class="table-responsive-wrapper" id="sector-analysis-table-wrapper">
-                            <table id="sector-analysis-table">
-                                <thead><tr><th class="col-setor">Setor</th><th class="col-unidades">Unidades</th><th class="col-skus">SKUs</th><th class="col-percent">%</th></tr></thead>
-                                <tbody>${tableRows}</tbody>
-                                <tfoot><tr><td class="col-setor">TOTAL</td><td class="col-unidades">${formatNumber(totalQuantidadeGeral)}</td><td class="col-skus">${formatNumber(totalSkusGeral)}</td><td class="col-percent">${totalPercent.toFixed(1).replace('.', ',')}%</td></tr></tfoot>
-                            </table>
-                        </div>`;
+                    sectorContainer.innerHTML = `<button class="copy-image-btn" data-target="#sector-analysis-table-wrapper" data-filename="analise_por_setor.png"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>Copiar como Imagem</button><div class="table-responsive-wrapper" id="sector-analysis-table-wrapper"><table id="sector-analysis-table"><thead><tr><th class="col-setor">Setor</th><th class="col-unidades">Unidades</th><th class="col-skus">SKUs</th><th class="col-percent">%</th></tr></thead><tbody>${tableRows}</tbody><tfoot><tr><td class="col-setor">TOTAL</td><td class="col-unidades">${formatNumber(totalQuantidadeGeral)}</td><td class="col-skus">${formatNumber(totalSkusGeral)}</td><td class="col-percent">${totalPercent.toFixed(1).replace('.', ',')}%</td></tr></tfoot></table></div>`;
                 } else {
-                    sectorSection.innerHTML = `<h2>Acompanhamento por Setor</h2><div class='placeholder-card'><p>Carregue a <strong>Planilha de Endereços</strong> para visualizar o acompanhamento por setor.</p></div>`;
+                    sectorContainer.innerHTML = `<div class='placeholder-card'><p>Carregue a <strong>Planilha de Endereços</strong> para visualizar o acompanhamento por setor.</p></div>`;
                 }
-                container.appendChild(sectorSection);
 
-                // --- NOVA SECÇÃO PARA ETIQUETAS ---
-                const labelAnalysisSection = document.createElement('div');
-                labelAnalysisSection.style.marginTop = '3rem'; 
-
-                const sortedSetores = [...setoresData.entries()].sort((a, b) => getOrder(a[0]) - getOrder(b[0]) || a[0].localeCompare(b[0]));
-                const labelSectorsData = sortedSetores.filter(([setor]) => labelSectors.has(setor.toUpperCase()));
-
+                // --- Label Analysis ---
+                const sortedSetoresForLabels = [...setoresData.entries()].sort((a, b) => getOrder(a[0]) - getOrder(b[0]) || a[0].localeCompare(b[0]));
+                const labelSectorsData = sortedSetoresForLabels.filter(([setor]) => labelSectors.has(setor.toUpperCase()));
                 if (labelSectorsData.length > 0) {
                     if (appState.productMasterData.size === 0) {
-                        labelAnalysisSection.innerHTML = `
-                            <h2>Estimativa de Etiquetas por Setor (QMS)</h2>
-                            <div class="placeholder-card"><p>Carregue a planilha de <strong>Cadastro de Produtos (QMS)</strong> para ver a estimativa de etiquetas.</p></div>
-                        `;
+                        labelContainer.innerHTML = `<h2>Estimativa de Etiquetas por Setor (QMS)</h2><div class="placeholder-card"><p>Carregue a planilha de <strong>Cadastro de Produtos (QMS)</strong> para ver a estimativa de etiquetas.</p></div>`;
                     } else {
-                        const labelTableRows = labelSectorsData.map(([setor, data]) => `
-                            <tr>
-                                <td class="col-setor">${setor}</td>
-                                <td class="col-etiquetas">${formatNumber(data.totalLabels)}</td>
-                            </tr>
-                        `).join('');
-
+                        const labelTableRows = labelSectorsData.map(([setor, data]) => `<tr><td class="col-setor">${setor}</td><td class="col-etiquetas">${formatNumber(data.totalLabels)}</td></tr>`).join('');
                         const totalEtiquetas = labelSectorsData.reduce((sum, [, data]) => sum + (data.totalLabels || 0), 0);
-
-                        labelAnalysisSection.innerHTML = `
-                            <h2>Estimativa de Etiquetas por Setor (QMS)</h2>
-                            <button class="copy-image-btn" data-target="#label-analysis-table-wrapper" data-filename="analise_etiquetas_por_setor.png">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                                Copiar como Imagem
-                            </button>
-                            <div class="table-responsive-wrapper" id="label-analysis-table-wrapper">
-                                <table id="label-analysis-table" style="border: 1px solid var(--border-color);">
-                                    <thead><tr><th class="col-setor">Setor</th><th class="col-etiquetas">Etiquetas (Est.)</th></tr></thead>
-                                    <tbody>${labelTableRows}</tbody>
-                                    <tfoot style="background-color: var(--sector-light); border-top: 2px solid var(--sector-primary);">
-                                        <tr><td class="col-setor">TOTAL ETIQUETAS</td><td class="col-etiquetas">${formatNumber(totalEtiquetas)}</td></tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        `;
+                        labelContainer.innerHTML = `<h2>Estimativa de Etiquetas por Setor (QMS)</h2><button class="copy-image-btn" data-target="#label-analysis-table-wrapper" data-filename="analise_etiquetas_por_setor.png"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>Copiar como Imagem</button><div class="table-responsive-wrapper" id="label-analysis-table-wrapper"><table id="label-analysis-table" style="border: 1px solid var(--border-color);"><thead><tr><th class="col-setor">Setor</th><th class="col-etiquetas">Etiquetas (Est.)</th></tr></thead><tbody>${labelTableRows}</tbody><tfoot style="background-color: var(--sector-light); border-top: 2px solid var(--sector-primary);"><tr><td class="col-setor">TOTAL ETIQUETAS</td><td class="col-etiquetas">${formatNumber(totalEtiquetas)}</td></tr></tfoot></table></div>`;
                     }
+                } else {
+                     labelContainer.innerHTML = ``;
                 }
-                container.appendChild(labelAnalysisSection);
-                // --- FIM DA NOVA SECÇÃO ---
 
-                const filialSection = document.createElement('div');
+                // --- Filial Analysis ---
                 if (filialData && filialData.size > 0) {
                     const sortedRotas = [...filialData.keys()].sort((a, b) => Number(a) - Number(b));
                     const filialAccordionsHTML = sortedRotas.map((rota, index) => {
-                        const filiaisDaRota = filialData.get(rota);
-                        if (!filiaisDaRota) return '';
+                        const filiaisDaRota = filialData.get(rota); if (!filiaisDaRota) return '';
                         const sortedFiliais = [...filiaisDaRota.entries()].sort((a, b) => b[1] - a[1]);
                         const totalRota = sortedFiliais.reduce((sum, [, qtd]) => sum + qtd, 0);
                         const filialRows = sortedFiliais.map(([filial, qtd]) => `<tr><td>${filial}</td><td>${formatNumber(qtd)}</td><td>${(totalRota > 0 ? (qtd / totalRota) * 100 : 0).toFixed(0)}%</td></tr>`).join('');
-                        
-                        return `
-                            <div class="rota-accordion-item">
-                                <div class="rota-accordion-header">
-                                    <h2>Rota: ${rota}</h2>
-                                    <div class="rota-summary-info">
-                                        <span>${sortedFiliais.length} Filial(is)</span>
-                                        <span>|</span>
-                                        <span>${formatNumber(totalRota)} Unidades</span>
-                                    </div>
-                                    <span class="toggle-icon-rota">▼</span>
-                                </div>
-                                <div class="rota-accordion-content">
-                                    <div class="content-wrapper table-responsive-wrapper">
-                                        <button class="copy-image-btn" data-target="#filial-table-${index}" data-filename="faturamento_rota_${rota}.png" style="margin-bottom: 1rem;">Copiar como Imagem</button>
-                                        <table id="filial-table-${index}">
-                                            <thead><tr><th>Filial</th><th>Unidades</th><th>% da Rota</th></tr></thead>
-                                            <tbody>${filialRows}</tbody>
-                                            <tfoot><tr><td><strong>Total Rota</strong></td><td><strong>${formatNumber(totalRota)}</strong></td><td><strong>100%</strong></td></tr></tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        return `<div class="rota-accordion-item"><div class="rota-accordion-header"><h2>Rota: ${rota}</h2><div class="rota-summary-info"><span>${sortedFiliais.length} Filial(is)</span><span>|</span><span>${formatNumber(totalRota)} Unidades</span></div><span class="toggle-icon-rota">▼</span></div><div class="rota-accordion-content"><div class="content-wrapper table-responsive-wrapper"><button class="copy-image-btn" data-target="#filial-table-${index}" data-filename="faturamento_rota_${rota}.png" style="margin-bottom: 1rem;">Copiar como Imagem</button><table id="filial-table-${index}"><thead><tr><th>Filial</th><th>Unidades</th><th>% da Rota</th></tr></thead><tbody>${filialRows}</tbody><tfoot><tr><td><strong>Total Rota</strong></td><td><strong>${formatNumber(totalRota)}</strong></td><td><strong>100%</strong></td></tr></tfoot></table></div></div></div>`;
                     }).join('');
-
-                    filialSection.innerHTML = `
-                        <h2 style="margin-top: 3rem;">Faturamento por Filiais (agrupado por Rota)</h2>
-                        <div class="summary-card" style="border-color: var(--sector-primary); background-color: var(--sector-light); color: var(--sector-primary);">
-                                <h2>Resumo de Filiais</h2>
-                                <p>${formatNumber(totalUniqueFiliais)} filiais faturaram no período.</p>
-                        </div>
-                        <div id="filial-accordion-container">${filialAccordionsHTML}</div>`;
+                    filialContainer.innerHTML = `<h2>Faturamento por Filiais</h2><div class="summary-card"><h2>Resumo de Filiais</h2><p>${formatNumber(totalUniqueFiliais)} filiais faturaram no período.</p></div><div id="filial-accordion-container">${filialAccordionsHTML}</div>`;
+                    filialContainer.querySelectorAll('.rota-accordion-header').forEach(header => header.addEventListener('click', () => header.parentElement.classList.toggle('open')));
                 } else {
-                    filialSection.innerHTML = `<h2 style="margin-top: 3rem;">Faturamento por Filiais</h2><div class='placeholder-card'><p>A <strong>Planilha de Itens</strong> precisa conter as colunas "Loja Cross" ou "Código da Loja" para esta análise.</p></div>`;
+                    filialContainer.innerHTML = `<h2>Faturamento por Filiais</h2><div class='placeholder-card'><p>A <strong>Planilha de Itens</strong> precisa conter as colunas "Loja Cross" ou "Código da Loja" para esta análise.</p></div>`;
                 }
-                container.appendChild(filialSection);
 
-                // Add event listeners for the new accordions
-                container.querySelectorAll('#filial-accordion-container .rota-accordion-item .rota-accordion-header').forEach(header => {
-                    header.addEventListener('click', () => {
-                        header.parentElement.classList.toggle('open');
-                    });
-                });
-
-
-                const semFaturamentoSection = document.createElement('div');
+                // --- No-Billing Analysis ---
                 if (filiaisSemFaturamento && filiaisSemFaturamento.length > 0) {
                     const listaFiliais = filiaisSemFaturamento.sort().map(filial => `<li>${filial}</li>`).join('');
-                    semFaturamentoSection.innerHTML = `
-                        <h2 style="margin-top: 3rem; color: var(--error-color); border-bottom-color: #f5c6cb;">Filiais Sem Faturamento</h2>
-                        <div class="summary-card" style="border-color: var(--error-color); background-color: #f8d7da; color: #721c24;">
-                                <h2>Atenção</h2>
-                                <p>${filiaisSemFaturamento.length} filiais não apresentaram faturamento no período.</p>
-                        </div>
-                        <div class="sector-detail-card">
-                            <div class="sector-detail-card-header"><h3>Lista de Filiais</h3></div>
-                            <div class="table-wrapper"><ul style="padding: 1.5rem 1.5rem 1.5rem 3rem; margin: 0; font-size: 0.9em; list-style-type: disc;">${listaFiliais}</ul></div>
-                        </div>`;
+                    noBillingContainer.innerHTML = `<h2>Filiais Sem Faturamento</h2><div class="summary-card"><h2>Atenção</h2><p>${filiaisSemFaturamento.length} filiais não apresentaram faturamento no período.</p></div><div class="sector-detail-card"><div class="sector-detail-card-header"><h3>Lista de Filiais</h3></div><div class="table-wrapper"><ul style="padding: 1.5rem 1.5rem 1.5rem 3rem; margin: 0; font-size: 0.9em; list-style-type: disc;">${listaFiliais}</ul></div></div>`;
+                } else {
+                     noBillingContainer.innerHTML = '';
                 }
-                container.appendChild(semFaturamentoSection);
             }
             
+            // ... the rest of the functions (displayProductAnalysisResults, etc.) remain the same
             function displayProductAnalysisResults(data) {
                 const top20Data = data.slice(0, 20);
                 const top20Container = document.getElementById('product-top20-geral-container');
+                top20Container.innerHTML = `<h2>Maiores Saídas por SKU (Top 20)</h2>`;
                 
-                const tableRows = top20Data.map(item => `
-                    <tr>
-                        <td>${item.codigo}</td>
-                        <td>${item.skus}</td>
-                        <td class="text-right">${formatNumber(item.unidades)}</td>
-                        <td class="text-right">${formatNumber(item.qms)}</td>
-                        <td class="text-right">${formatNumber(item.cx)}</td>
-                        <td class="text-right">${item.percent.toFixed(2).replace('.', ',')}%</td>
-                        <td>${item.setor}</td>
-                        <td>${item.posicao}</td>
-                    </tr>
-                `).join('');
-                
+                if (top20Data.length === 0) {
+                    top20Container.innerHTML += `<div class="placeholder-card"><p>Sem dados de produtos para exibir.</p></div>`;
+                    return;
+                }
+
+                const tableRows = top20Data.map(item => `<tr><td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td><td class="text-right">${formatNumber(item.qms)}</td><td class="text-right">${item.cx.toFixed(1).replace('.',',')}</td><td class="text-right">${item.percent.toFixed(2).replace('.', ',')}%</td><td>${item.setor}</td><td>${item.posicao}</td></tr>`).join('');
                 const totalUnidades = top20Data.reduce((sum, item) => sum + item.unidades, 0);
                 const totalCx = top20Data.reduce((sum, item) => sum + item.cx, 0);
                 const totalPercent = top20Data.reduce((sum, item) => sum + item.percent, 0);
 
-                top20Container.innerHTML = `
-                    <h2>Acompanhamento de Maiores Saídas por SKU (Top 20 Geral)</h2>
-                        <button class="copy-image-btn" data-target="#product-top20-geral-table-wrapper" data-filename="top_20_skus_geral.png">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                            Copiar como Imagem
-                        </button>
-                    <div class="table-responsive-wrapper" id="product-top20-geral-table-wrapper">
-                        <table id="product-top20-geral-table">
-                            <thead><tr><th>Código</th><th>SKUS</th><th class="text-right">Unidades</th><th class="text-right">QMS</th><th class="text-right">CX</th><th class="text-right">%</th><th>Setor</th><th>Posição</th></tr></thead>
-                            <tbody>${tableRows}</tbody>
-                            <tfoot><tr><td colspan="2"><strong>TOTAL (TOP 20)</strong></td><td class="text-right"><strong>${formatNumber(totalUnidades)}</strong></td><td></td><td class="text-right"><strong>${formatNumber(totalCx)}</strong></td><td class="text-right"><strong>${totalPercent.toFixed(2).replace('.', ',')}%</strong></td><td colspan="2"></td></tr></tfoot>
-                        </table>
-                    </div>`;
+                top20Container.innerHTML += `<button class="copy-image-btn" data-target="#product-top20-geral-table-wrapper" data-filename="top_20_skus_geral.png"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>Copiar como Imagem</button><div class="table-responsive-wrapper" id="product-top20-geral-table-wrapper"><table id="product-top20-geral-table"><thead><tr><th>Código</th><th>SKUS</th><th class="text-right">Unidades</th><th class="text-right">QMS</th><th class="text-right">CX</th><th class="text-right">%</th><th>Setor</th><th>Posição</th></tr></thead><tbody>${tableRows}</tbody><tfoot><tr><td colspan="2"><strong>TOTAL (TOP 20)</strong></td><td class="text-right"><strong>${formatNumber(totalUnidades)}</strong></td><td></td><td class="text-right"><strong>${totalCx.toFixed(1).replace('.',',')}</strong></td><td class="text-right"><strong>${totalPercent.toFixed(2).replace('.', ',')}%</strong></td><td colspan="2"></td></tr></tfoot></table></div>`;
             }
 
             function displayTop20BySector(productsBySector) {
                 const container = document.getElementById('product-top20-setor-container');
-                container.innerHTML = `
-                    <h2>Top 20 Maiores Saídas por Setor</h2>
-                    <div class="search-container">
-                        <input type="text" id="sectorSearchInput" placeholder="Pesquisar por setor...">
-                    </div>
-                `;
-
+                 if (Object.keys(productsBySector).length === 0) {
+                    container.innerHTML = ``;
+                    return;
+                }
+                container.innerHTML = `<h2>Top 20 Saídas por Setor</h2><div class="search-container"><input type="text" id="sectorSearchInput" placeholder="Pesquisar por setor..."></div>`;
                 const sortedSectors = Object.keys(productsBySector).sort((a,b) => getOrder(a) - getOrder(b));
                 const grid = document.createElement('div');
                 grid.className = 'sector-detail-grid';
-
                 sortedSectors.forEach((setor, index) => {
                     const products = productsBySector[setor];
                     const top20 = products.sort((a, b) => b.unidades - a.unidades).slice(0, 20);
                     const tableRows = top20.map(item => `<tr><td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td></tr>`).join('');
                     const totalUnidadesSetor = products.reduce((sum, item) => sum + item.unidades, 0);
-
                     const card = document.createElement('div');
                     card.className = 'sector-detail-card';
-                    card.innerHTML = `
-                        <div class="sector-detail-card-header">
-                            <h3>Setor: ${setor}</h3>
-                             <span class="toggle-icon-sector">▼</span>
-                        </div>
-                        <div class="sector-detail-content">
-                            <div class="table-wrapper">
-                                 <button class="copy-image-btn" data-target="#sector-card-table-${index}" data-filename="top20_${setor.replace(/\s/g, '_')}.png">
-                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                                     Copiar como Imagem
-                                 </button>
-                                <div class="table-responsive-wrapper">
-                                    <table id="sector-card-table-${index}">
-                                        <thead><tr><th>Código</th><th>SKU</th><th class="text-right">Unidades</th></tr></thead>
-                                        <tbody>${tableRows}</tbody>
-                                        <tfoot><tr><td colspan="2"><strong>Total do Setor</strong></td><td class="text-right"><strong>${formatNumber(totalUnidadesSetor)}</strong></td></tr></tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>`;
-                    
-                    card.querySelector('.sector-detail-card-header').addEventListener('click', (e) => {
-                        card.classList.toggle('open');
-                    });
-                    
+                    card.innerHTML = `<div class="sector-detail-card-header"><h3>Setor: ${setor}</h3><span class="toggle-icon-sector">▼</span></div><div class="sector-detail-content"><div class="table-wrapper"><button class="copy-image-btn" data-target="#sector-card-table-${index}" data-filename="top20_${setor.replace(/\s/g, '_')}.png"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>Copiar como Imagem</button><div class="table-responsive-wrapper"><table id="sector-card-table-${index}"><thead><tr><th>Código</th><th>SKU</th><th class="text-right">Unidades</th></tr></thead><tbody>${tableRows}</tbody><tfoot><tr><td colspan="2"><strong>Total do Setor</strong></td><td class="text-right"><strong>${formatNumber(totalUnidadesSetor)}</strong></td></tr></tfoot></table></div></div></div>`;
+                    card.querySelector('.sector-detail-card-header').addEventListener('click', (e) => { card.classList.toggle('open'); });
                     grid.appendChild(card);
                 });
                 container.appendChild(grid);
-
                 document.getElementById('sectorSearchInput').addEventListener('input', (e) => {
                     const searchTerm = e.target.value.toLowerCase();
                     grid.querySelectorAll('.sector-detail-card').forEach(card => {
@@ -1356,6 +1211,10 @@
             }
 
             function setupProductSearch(fullProductList, productSalesDetails) {
+                 if (fullProductList.length === 0) {
+                    document.getElementById('product-search-container').innerHTML = '';
+                    return;
+                }
                 const searchInput = document.getElementById('productSearchInput');
                 const resultsContainer = document.getElementById('product-search-results-container');
                 const actionsContainer = document.getElementById('product-search-actions');
@@ -1363,103 +1222,63 @@
 
                 function displaySearchResults(results, isSelectionView = false) {
                     if (results.length === 0) {
-                        resultsContainer.innerHTML = isSelectionView 
-                            ? `<div class="placeholder-card"><p>Nenhum produto selecionado.</p></div>`
-                            : `<div class="placeholder-card"><p>Nenhum produto encontrado.</p></div>`;
+                        resultsContainer.innerHTML = isSelectionView ? `<div class="placeholder-card"><p>Nenhum produto selecionado.</p></div>` : `<div class="placeholder-card"><p>Nenhum produto encontrado.</p></div>`;
                         return;
                     }
-
-                    const detailsButtonHTML = (item) => {
-                        if (isReadOnlySharedView) {
-                            return `<td><button class="action-btn" style="padding: 0.5rem 1rem; opacity: 0.5; cursor: not-allowed;" disabled title="Detalhes indisponíveis na vista partilhada">Ver Detalhes</button></td>`;
-                        }
-                        return `<td><button class="details-btn action-btn" data-code="${item.codigo}" style="padding: 0.5rem 1rem;">Ver Detalhes</button></td>`;
-                    };
-
-                    const tableRows = results.map(item => `
-                        <tr>
-                            <td class="col-select"><input type="checkbox" class="product-select" data-code="${item.codigo}" ${appState.selectedProducts.has(item.codigo) ? 'checked' : ''}></td>
-                            <td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td>
-                            <td>${item.setor}</td><td>${item.posicao}</td>
-                            ${detailsButtonHTML(item)}
-                        </tr>`).join('');
+                    const detailsButtonHTML = (item) => isReadOnlySharedView ? `<td><button class="action-btn" style="padding: 0.5rem 1rem; opacity: 0.5; cursor: not-allowed;" disabled title="Detalhes indisponíveis na vista partilhada">Ver Detalhes</button></td>` : `<td><button class="details-btn action-btn" data-code="${item.codigo}" style="padding: 0.5rem 1rem;">Ver Detalhes</button></td>`;
+                    const tableRows = results.map(item => `<tr><td class="col-select"><input type="checkbox" class="product-select" data-code="${item.codigo}" ${appState.selectedProducts.has(item.codigo) ? 'checked' : ''}></td><td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td><td>${item.setor}</td><td>${item.posicao}</td>${detailsButtonHTML(item)}</tr>`).join('');
                     resultsContainer.innerHTML = `<div class="table-responsive-wrapper"><table><thead><tr><th class="col-select"><input type="checkbox" id="select-all-visible"></th><th>Código</th><th>SKU</th><th class="text-right">Unidades</th><th>Setor</th><th>Posição</th><th>Ações</th></tr></thead><tbody>${tableRows}</tbody></table></div>`;
                 }
-                
                 function updateSelectionActions() {
                     if (appState.selectedProducts.size > 0) {
-                        const exportButtonsHTML = isReadOnlySharedView ? '' : `
-                            <button id="export-selected-excel-btn" class="action-btn excel">Exportar Detalhes (Excel)</button>
-                            <button id="export-selected-pdf-btn" class="action-btn pdf">Exportar Detalhes (PDF)</button>`;
-
-                        actionsContainer.innerHTML = `
-                            <p>${appState.selectedProducts.size} produto(s) selecionado(s)</p>
-                            <button id="view-selected-btn" class="action-btn" style="background-color: var(--primary-color); color: white;">Visualizar Selecionados</button>
-                            ${exportButtonsHTML}
-                            <button id="clear-selection-btn" class="action-btn" style="background-color: var(--secondary-color); color: white;">Limpar Seleção</button>
-                        `;
+                        const exportButtonsHTML = isReadOnlySharedView ? '' : `<button id="export-selected-excel-btn" class="action-btn excel">Exportar Detalhes (Excel)</button><button id="export-selected-pdf-btn" class="action-btn pdf">Exportar Detalhes (PDF)</button>`;
+                        actionsContainer.innerHTML = `<p>${appState.selectedProducts.size} produto(s) selecionado(s)</p><button id="view-selected-btn" class="action-btn" style="background-color: var(--primary-color); color: white;">Visualizar Selecionados</button>${exportButtonsHTML}<button id="clear-selection-btn" class="action-btn" style="background-color: var(--secondary-color); color: white;">Limpar Seleção</button>`;
                         actionsContainer.classList.remove('hidden');
                     } else {
                         actionsContainer.classList.add('hidden');
                     }
                 }
-
                 searchInput.addEventListener('input', (e) => {
                     clearTimeout(debounceTimeout);
                     debounceTimeout = setTimeout(() => {
                         const searchTerms = e.target.value.trim().toUpperCase().split(/[\s,;]+/).filter(term => term.length > 0);
-                        
                         if (searchTerms.length === 0) {
-                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>`;
-                            return;
+                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>`; return;
                         }
-
                         if (searchTerms.length === 1 && searchTerms[0].length < 3) {
-                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>Digite pelo menos 3 caracteres para pesquisar por um único item.</p></div>`;
-                            return;
+                            resultsContainer.innerHTML = `<div class="placeholder-card"><p>Digite pelo menos 3 caracteres para pesquisar por um único item.</p></div>`; return;
                         }
-
                         const searchResults = fullProductList.filter(item => {
                             const itemCode = item.codigo.toUpperCase();
                             const itemSkus = item.skus.toUpperCase();
                             return searchTerms.some(term => itemCode.includes(term) || itemSkus.includes(term));
                         });
-
                         displaySearchResults(searchResults);
                     }, 300);
                 });
-
                 resultsContainer.addEventListener('click', (e) => {
                     if (e.target.classList.contains('details-btn')) {
                         const productCode = e.target.getAttribute('data-code');
-                        showProductDetailsModal(
-                            fullProductList.find(p => p.codigo === productCode),
-                            productSalesDetails.get(productCode)
-                        );
+                        showProductDetailsModal(fullProductList.find(p => p.codigo === productCode), productSalesDetails.get(productCode));
                     } else if (e.target.classList.contains('product-select')) {
                         const code = e.target.dataset.code;
-                        if (e.target.checked) {
-                            appState.selectedProducts.add(code);
-                        } else {
-                            appState.selectedProducts.delete(code);
-                        }
+                        if (e.target.checked) appState.selectedProducts.add(code);
+                        else appState.selectedProducts.delete(code);
                         updateSelectionActions();
                     } else if (e.target.id === 'select-all-visible') {
-                            const checkboxes = resultsContainer.querySelectorAll('.product-select');
-                            checkboxes.forEach(cb => {
-                                cb.checked = e.target.checked;
-                                const code = cb.dataset.code;
-                                if (e.target.checked) appState.selectedProducts.add(code);
-                                else appState.selectedProducts.delete(code);
-                            });
-                            updateSelectionActions();
+                        const checkboxes = resultsContainer.querySelectorAll('.product-select');
+                        checkboxes.forEach(cb => {
+                            cb.checked = e.target.checked;
+                            const code = cb.dataset.code;
+                            if (e.target.checked) appState.selectedProducts.add(code);
+                            else appState.selectedProducts.delete(code);
+                        });
+                        updateSelectionActions();
                     }
                 });
-                
                 actionsContainer.addEventListener('click', e => {
                     if (appState.selectedProducts.size === 0) return;
                     const selectedItems = fullProductList.filter(p => appState.selectedProducts.has(p.codigo));
-
                     if (e.target.id === 'view-selected-btn') {
                         displaySearchResults(selectedItems, true);
                         searchInput.value = ``;
@@ -1481,7 +1300,6 @@
                                 let rota = String(row['Rota'] || 'N/A').trim();
                                 if(storeInfo && rota === '916') rota = storeInfo.rota;
                                 const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
-
                                 if(!acc[filialKey]) acc[filialKey] = { rota: rota, qtd: 0 };
                                 acc[filialKey].qtd += qty;
                                 return acc;
@@ -1491,67 +1309,46 @@
                             return { name: item.codigo.substring(0, 31), data: dataToExport };
                         });
                         exportToExcel(sheets, 'detalhes_produtos_selecionados.xlsx');
-
                     } else if (e.target.id === 'export-selected-pdf-btn') {
-                            const { jsPDF } = window.jspdf;
-                            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-                            let lastY = 35;
-                            
-                            doc.setFontSize(18);
-                            doc.setTextColor('#343a40');
-                            doc.text('Relatório Detalhado de Produtos Selecionados', 14, 22);
-
-                            selectedItems.forEach((item, index) => {
-                                    const details = productSalesDetails.get(item.codigo) || [];
-                                    const salesByFilial = details.reduce((acc, row) => {
-                                    const codigoLoja = String(row['Loja Cross'] || row['Código da Loja'] || 'N/A').trim();
-                                    const storeInfo = masterStoreList.get(codigoLoja);
-                                    const nomeLoja = storeInfo ? storeInfo.name : (String(row['Nome da Loja'] || '').trim() || 'N/A');
-                                    const filialKey = `${codigoLoja} - ${nomeLoja}`;
-                                    let rota = String(row['Rota'] || 'N/A').trim();
-                                    if(storeInfo && rota === '916') rota = storeInfo.rota;
-                                    const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
-
-                                    if(!acc[filialKey]) acc[filialKey] = { rota: rota, qtd: 0 };
-                                    acc[filialKey].qtd += qty;
-                                    return acc;
-                                }, {});
-                                const sortedFiliais = Object.entries(salesByFilial).sort((a,b) => b[1].qtd - a[1].qtd);
-                                const body = sortedFiliais.map(([filial, data]) => [data.rota, filial, data.qtd]);
-
-                                    if (index > 0) {
-                                        const spaceNeeded = 15 + body.length * 7; // rough estimate
-                                        if (lastY + spaceNeeded > 280) { // check if new table fits
-                                            doc.addPage();
-                                            lastY = 22;
-                                        } else {
-                                            lastY += 15;
-                                        }
-                                    }
-
-                                    doc.setFontSize(12);
-                                    const productColor = getComputedStyle(document.documentElement).getPropertyValue('--product-primary').trim();
-                                    doc.setTextColor(productColor);
-                                    doc.text(`${item.codigo} - ${item.skus}`, 14, lastY);
-                                    
-                                    doc.autoTable({
-                                        head: [['Rota', 'Filial', 'Unidades']],
-                                        body: body,
-                                        startY: lastY + 2,
-                                        theme: 'grid',
-                                        headStyles: { fillColor: [111, 66, 193] },
-                                        didDrawPage: (data) => {
-                                            lastY = data.cursor.y;
-                                        }
-                                    });
-                                });
-                                doc.save('detalhes_produtos_selecionados.pdf');
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                        let lastY = 35;
+                        doc.setFontSize(18);
+                        doc.setTextColor('#343a40');
+                        doc.text('Relatório Detalhado de Produtos Selecionados', 14, 22);
+                        selectedItems.forEach((item, index) => {
+                            const details = productSalesDetails.get(item.codigo) || [];
+                            const salesByFilial = details.reduce((acc, row) => {
+                                const codigoLoja = String(row['Loja Cross'] || row['Código da Loja'] || 'N/A').trim();
+                                const storeInfo = masterStoreList.get(codigoLoja);
+                                const nomeLoja = storeInfo ? storeInfo.name : (String(row['Nome da Loja'] || '').trim() || 'N/A');
+                                const filialKey = `${codigoLoja} - ${nomeLoja}`;
+                                let rota = String(row['Rota'] || 'N/A').trim();
+                                if(storeInfo && rota === '916') rota = storeInfo.rota;
+                                const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
+                                if(!acc[filialKey]) acc[filialKey] = { rota: rota, qtd: 0 };
+                                acc[filialKey].qtd += qty;
+                                return acc;
+                            }, {});
+                            const sortedFiliais = Object.entries(salesByFilial).sort((a,b) => b[1].qtd - a[1].qtd);
+                            const body = sortedFiliais.map(([filial, data]) => [data.rota, filial, data.qtd]);
+                            if (index > 0) {
+                                const spaceNeeded = 15 + body.length * 7;
+                                if (lastY + spaceNeeded > 280) { doc.addPage(); lastY = 22; } else { lastY += 15; }
                             }
+                            doc.setFontSize(12);
+                            const productColor = getComputedStyle(document.documentElement).getPropertyValue('--product-primary').trim();
+                            doc.setTextColor(productColor);
+                            doc.text(`${item.codigo} - ${item.skus}`, 14, lastY);
+                            doc.autoTable({ head: [['Rota', 'Filial', 'Unidades']], body: body, startY: lastY + 2, theme: 'grid', headStyles: { fillColor: [111, 66, 193] }, didDrawPage: (data) => { lastY = data.cursor.y; } });
+                        });
+                        doc.save('detalhes_produtos_selecionados.pdf');
+                    }
                 });
             }
 
             function showProductDetailsModal(productInfo, salesDetails) {
-                const modal = document.getElementById('details-modal');
+                 const modal = document.getElementById('details-modal');
                 const salesByFilial = (salesDetails || []).reduce((acc, row) => {
                     const codigoLoja = String(row['Loja Cross'] || row['Código da Loja'] || 'N/A').trim();
                     const storeInfo = masterStoreList.get(codigoLoja);
@@ -1560,42 +1357,30 @@
                     let rota = String(row['Rota'] || 'N/A').trim();
                     if(storeInfo && rota === '916') rota = storeInfo.rota;
                     const qty = parseFloat(row['Qtd'] || row['Sum Qtd Solicitada'] || row['Tot'] || 0);
-
                     if(!acc[filialKey]) acc[filialKey] = { rota: rota, qtd: 0 };
                     acc[filialKey].qtd += qty;
                     return acc;
                 }, {});
-
                 const sortedFiliais = Object.entries(salesByFilial).sort((a,b) => b[1].qtd - a[1].qtd);
                 const tableRows = sortedFiliais.map(([filial, data]) => `<tr><td>${data.rota}</td><td>${filial}</td><td class="text-right">${formatNumber(data.qtd)}</td></tr>`).join('');
-
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <div class="modal-header"><h3>Detalhes de Saída: ${productInfo.skus} (${productInfo.codigo})</h3><button class="modal-close-btn">&times;</button></div>
-                        <div class="modal-body table-responsive-wrapper"><table><thead><tr><th>Rota</th><th>Filial</th><th class="text-right">Unidades</th></tr></thead><tbody>${tableRows}</tbody></table></div>
-                        <div class="modal-footer">
-                            <button class="export-btn pdf" data-type="pdf" data-code="${productInfo.codigo}">Exportar PDF</button>
-                            <button class="export-btn excel" data-type="excel" data-code="${productInfo.codigo}">Exportar Excel</button>
-                        </div>
-                    </div>`;
+                modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>Detalhes de Saída: ${productInfo.skus} (${productInfo.codigo})</h3><button class="modal-close-btn">&times;</button></div><div class="modal-body table-responsive-wrapper"><table><thead><tr><th>Rota</th><th>Filial</th><th class="text-right">Unidades</th></tr></thead><tbody>${tableRows}</tbody></table></div><div class="modal-footer"><button class="export-btn pdf" data-type="pdf" data-code="${productInfo.codigo}">Exportar PDF</button><button class="export-btn excel" data-type="excel" data-code="${productInfo.codigo}">Exportar Excel</button></div></div>`;
                 modal.classList.remove('hidden');
                 modal.querySelector('.modal-close-btn').addEventListener('click', () => modal.classList.add('hidden'));
                 modal.addEventListener('click', (e) => { 
                     if (e.target === modal) modal.classList.add('hidden');
                     else if (e.target.classList.contains('export-btn')) {
-                            const type = e.target.dataset.type;
-                            const code = e.target.dataset.code;
-                            const filename = `Detalhes_Produto_${code.replace(/\s/g, '_')}`;
-                            const title = `Detalhes de Saída: ${productInfo.skus} (${code})`;
-                            const head = ['Rota', 'Filial', 'Unidades'];
-                            const body = sortedFiliais.map(([filial, data]) => [data.rota, filial, data.qtd]);
-                            
-                            if(type === 'excel') {
-                                const dataToExport = body.map(row => ({ 'Rota': row[0], 'Filial': row[1], 'Unidades': row[2] }));
-                                exportToExcel([{ name: 'Detalhes', data: dataToExport }], `${filename}.xlsx`);
-                            } else {
-                                exportToPdf(title, head, body, `${filename}.pdf`);
-                            }
+                        const type = e.target.dataset.type;
+                        const code = e.target.dataset.code;
+                        const filename = `Detalhes_Produto_${code.replace(/\s/g, '_')}`;
+                        const title = `Detalhes de Saída: ${productInfo.skus} (${code})`;
+                        const head = ['Rota', 'Filial', 'Unidades'];
+                        const body = sortedFiliais.map(([filial, data]) => [data.rota, filial, data.qtd]);
+                        if(type === 'excel') {
+                            const dataToExport = body.map(row => ({ 'Rota': row[0], 'Filial': row[1], 'Unidades': row[2] }));
+                            exportToExcel([{ name: 'Detalhes', data: dataToExport }], `${filename}.xlsx`);
+                        } else {
+                            exportToPdf(title, head, body, `${filename}.pdf`);
+                        }
                     }
                 });
             }
@@ -1619,72 +1404,57 @@
                 const addressDataArray = JSON.parse(localStorage.getItem('addressData'));
                 const productMasterDataArray = JSON.parse(localStorage.getItem('productMasterData'));
                 const savedTimestamp = localStorage.getItem('lastUpdateTime');
-
                 let dataLoaded = false;
                 if (ordersData) { appState.ordersData = ordersData; UIElements.dropAreas.orders.classList.add('loaded'); dataLoaded = true; }
                 if (nonReturnedOrdersArray) { appState.nonReturnedOrders = new Set(nonReturnedOrdersArray); UIElements.dropAreas.status.classList.add('loaded'); dataLoaded = true; }
                 if (sectorData) { appState.sectorData = sectorData; UIElements.dropAreas.sector.classList.add('loaded'); dataLoaded = true; }
                 if (addressDataArray) { appState.addressData = new Map(addressDataArray); UIElements.dropAreas.address.classList.add('loaded'); dataLoaded = true; }
                 if (productMasterDataArray) { appState.productMasterData = new Map(productMasterDataArray); UIElements.dropAreas.productMaster.classList.add('loaded'); dataLoaded = true; }
-
                 if (savedTimestamp) updateTimestamp(savedTimestamp);
-
                 if (dataLoaded) {
                     showNotification('Dados da sessão anterior carregados.', 'success');
                     UIElements.containers.actions.classList.remove('hidden');
-                    runValidationAnalysis();
-                    runSectorAnalysis();
-                    runProductAnalysis();
+                    runAllAnalyses();
                     autoClosePanel();
                 }
             }
             
             async function saveAnalysisToFirebase() {
-                if (!db) {
-                    showNotification("Serviço de partilha indisponível.", "error");
-                    return;
-                }
+                if (!db) { showNotification("Serviço de partilha indisponível.", "error"); return; }
                 if (!appState.processedData.sectorAnalysis || !appState.processedData.productAnalysis) {
                     showNotification('Execute pelo menos uma análise antes de partilhar.', 'error');
                     return;
                 }
-
                 const lastId = localStorage.getItem('lastSharedAnalysisId');
-
                 const performShare = async (mode, existingId = null) => {
                     UIElements.loader.classList.remove('hidden');
                     try {
                         let analysisId = existingId;
-
                         if (mode === 'update' && existingId) {
                             showNotification('A atualizar a partilha existente... a apagar dados antigos.', 'warning');
-                            const subcollections = ['sector_data', 'filial_data', 'data_chunks'];
+                            const subcollections = ['sector_details', 'filial_details', 'data_chunks'];
                             for (const sub of subcollections) {
                                 const subRef = collection(db, "shared_analyses", existingId, sub);
                                 const snapshot = await getDocs(subRef);
-                                
                                 const deletePromises = [];
                                 let batch = writeBatch(db);
                                 let count = 0;
                                 snapshot.forEach(doc => {
                                     batch.delete(doc.ref);
                                     count++;
-                                    if (count === 499) {
+                                    if (count >= 499) {
                                         deletePromises.push(batch.commit());
                                         batch = writeBatch(db);
                                         count = 0;
                                     }
                                 });
-                                if (count > 0) {
-                                    deletePromises.push(batch.commit());
-                                }
+                                if (count > 0) deletePromises.push(batch.commit());
                                 await Promise.all(deletePromises);
                             }
                         }
                         
                         showNotification('A preparar e a enviar os novos dados...', 'warning');
                         const { sectorAnalysis, productAnalysis } = appState.processedData;
-
                         const manifestData = {
                             totalQuantidadeGeral: sectorAnalysis.totalQuantidadeGeral,
                             totalSkusGeral: sectorAnalysis.totalSkusGeral,
@@ -1692,232 +1462,152 @@
                             filiaisSemFaturamento: sectorAnalysis.filiaisSemFaturamento || [],
                             lastUpdateTime: localStorage.getItem('lastUpdateTime') || new Date().toISOString(),
                             createdAt: new Date().toISOString(),
-                            // AQUI ESTÁ A CORREÇÃO: Adicionar o ID do utilizador
                             userId: auth.currentUser ? auth.currentUser.uid : null
                         };
-
                         if (mode === 'create_new') {
                              const newDocRef = doc(collection(db, "shared_analyses"));
                              analysisId = newDocRef.id;
                         }
                         
                         const manifestDocRef = doc(db, "shared_analyses", analysisId);
-
                         const allBatches = [];
                         let batch = writeBatch(db);
                         let operationCount = 0;
-                        
                         batch.set(manifestDocRef, manifestData);
                         operationCount++;
 
                         const commitBatchIfNeeded = () => {
-                            if (operationCount > 0 && operationCount % 499 === 0) {
+                            if (operationCount > 0 && operationCount >= 499) {
                                 allBatches.push(batch.commit());
                                 batch = writeBatch(db);
+                                operationCount = 0;
                             }
                         };
                         
                         const { setoresData, filialData } = sectorAnalysis;
                         const analysisData = productAnalysis.analysisData;
 
-                        const sectorDataRef = collection(db, "shared_analyses", analysisId, "sector_data");
+                        // OTIMIZAÇÃO: Salvar dados de setor de forma consolidada
+                        const sectorDetailsRef = collection(db, "shared_analyses", analysisId, "sector_details");
                         for (const [setor, data] of setoresData.entries()) {
-                            for (const [codigo, productData] of data.products.entries()) {
-                                const productDoc = { setor, codigo, descr: productData.descr, totalQtd: productData.totalQtd };
-                                const newDocRef = doc(sectorDataRef);
-                                batch.set(newDocRef, productDoc);
-                                operationCount++;
-                                commitBatchIfNeeded();
-                            }
+                            const productsArray = Array.from(data.products.entries()).map(([codigo, productData]) => ({ codigo: codigo, descr: productData.descr, totalQtd: productData.totalQtd }));
+                            const sectorDocRef = doc(sectorDetailsRef, setor.replace(/\//g, '_')); // Sanitize doc ID
+                            batch.set(sectorDocRef, { products: productsArray });
+                            operationCount++;
+                            commitBatchIfNeeded();
                         }
 
-                        const filialDataRef = collection(db, "shared_analyses", analysisId, "filial_data");
+                        // OTIMIZAÇÃO: Salvar dados de filial de forma consolidada
+                        const filialDetailsRef = collection(db, "shared_analyses", analysisId, "filial_details");
                         for (const [rota, filiais] of filialData.entries()) {
-                            for (const [filial, unidades] of filiais.entries()) {
-                                const filialDoc = { rota, filial, unidades };
-                                const newDocRef = doc(filialDataRef);
-                                batch.set(newDocRef, filialDoc);
-                                operationCount++;
-                                commitBatchIfNeeded();
-                            }
-                        }
-
-                        const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
-                        const chunkSize = 2000;
-                        for (let i = 0; i < analysisData.length; i += chunkSize) {
-                            const chunk = analysisData.slice(i, i + chunkSize);
-                            const chunkDoc = { chunkIndex: i / chunkSize, data: chunk };
-                            const newDocRef = doc(dataChunksRef);
-                            batch.set(newDocRef, chunkDoc);
+                            const filiaisArray = Array.from(filiais.entries()).map(([filial, unidades]) => ({ filial: filial, unidades: unidades }));
+                            const rotaDocRef = doc(filialDetailsRef, rota.replace(/\//g, '_')); // Sanitize doc ID
+                            batch.set(rotaDocRef, { filiais: filiaisArray });
                             operationCount++;
                             commitBatchIfNeeded();
                         }
                         
-                        if(operationCount % 499 !== 0 || operationCount === 1) { // Also commit if only manifest exists
-                           allBatches.push(batch.commit());
+                        const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+                        const chunkSize = 2000;
+                        for (let i = 0; i < analysisData.length; i += chunkSize) {
+                            const chunk = analysisData.slice(i, i + chunkSize);
+                            const newDocRef = doc(dataChunksRef);
+                            batch.set(newDocRef, { chunkIndex: i / chunkSize, data: chunk });
+                            operationCount++;
+                            commitBatchIfNeeded();
                         }
-
+                        
+                        if(operationCount > 0) allBatches.push(batch.commit());
                         await Promise.all(allBatches);
-
                         localStorage.setItem('lastSharedAnalysisId', analysisId);
                         const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
                         showShareLinkModal(shareUrl);
-
                     } catch (error) {
                         console.error("Error saving analysis to Firebase:", error);
                         let errorMessage = "Erro ao guardar a análise para partilha.";
-                        if (error.code === 'permission-denied') {
-                            errorMessage = "Erro de permissão. Verifique as regras de segurança do Firestore para permitir escritas.";
-                        } else {
-                            errorMessage += " Verifique a console para mais detalhes técnicos.";
-                        }
+                        if (error.code === 'permission-denied') errorMessage = "Erro de permissão. Verifique as regras de segurança do Firestore para permitir escritas.";
+                        else errorMessage += " Verifique a console para mais detalhes técnicos.";
                         showNotification(errorMessage, "error", 10000);
                     } finally {
                         UIElements.loader.classList.add('hidden');
                     }
                 };
-
                 if (lastId) {
                     const modal = document.getElementById('update-share-modal');
                     modal.classList.remove('hidden');
-                    
-                    document.getElementById('create-new-share-btn').onclick = () => {
-                        modal.classList.add('hidden');
-                        performShare('create_new');
-                    };
-                    
-                    document.getElementById('update-existing-share-btn').onclick = () => {
-                        modal.classList.add('hidden');
-                        performShare('update', lastId);
-                    };
+                    document.getElementById('create-new-share-btn').onclick = () => { modal.classList.add('hidden'); performShare('create_new'); };
+                    document.getElementById('update-existing-share-btn').onclick = () => { modal.classList.add('hidden'); performShare('update', lastId); };
                 } else {
                     performShare('create_new');
                 }
             }
 
-
             async function loadAnalysisFromFirebase(analysisId) {
                 isReadOnlySharedView = true;
-                if (!db) {
-                    showNotification("Serviço de partilha indisponível.", "error");
-                    return;
-                }
+                if (!db) { showNotification("Serviço de partilha indisponível.", "error"); return; }
                 UIElements.loader.classList.remove('hidden');
-
                 try {
-                    // 1. Carregar o documento principal (manifesto).
                     const manifestDocRef = doc(db, "shared_analyses", analysisId);
                     const manifestSnap = await getDoc(manifestDocRef);
-
-                    if (!manifestSnap.exists()) {
-                        showNotification("Análise não encontrada. O link pode estar incorreto.", "error");
-                        return;
-                    }
-                    
+                    if (!manifestSnap.exists()) { showNotification("Análise não encontrada.", "error"); return; }
                     const manifestData = manifestSnap.data();
 
-                    // 2. Carregar os dados das 3 subcoleções em paralelo.
-                    const sectorDataRef = collection(db, "shared_analyses", analysisId, "sector_data");
-                    const filialDataRef = collection(db, "shared_analyses", analysisId, "filial_data");
+                    const sectorDetailsRef = collection(db, "shared_analyses", analysisId, "sector_details");
+                    const filialDetailsRef = collection(db, "shared_analyses", analysisId, "filial_details");
                     const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
+                    const [sectorSnapshot, filialSnapshot, dataSnapshot] = await Promise.all([ getDocs(sectorDetailsRef), getDocs(filialDetailsRef), getDocs(dataChunksRef) ]);
 
-                    const [sectorSnapshot, filialSnapshot, dataSnapshot] = await Promise.all([
-                        getDocs(sectorDataRef),
-                        getDocs(filialDataRef),
-                        getDocs(dataChunksRef)
-                    ]);
-
-                    // 3. Reconstruir o objeto `sectorAnalysis`.
                     const setoresData = new Map();
                     sectorSnapshot.forEach(doc => {
+                        const setor = doc.id.replace(/_/g, '/');
                         const data = doc.data();
-                        const { setor, codigo, descr, totalQtd } = data;
-                        
-                        if (!setoresData.has(setor)) {
-                            setoresData.set(setor, { totalQtd: 0, products: new Map() });
+                        const productsMap = new Map();
+                        let totalQtd = 0;
+                        if (data.products && Array.isArray(data.products)) {
+                            data.products.forEach(product => {
+                                productsMap.set(product.codigo, { descr: product.descr, totalQtd: product.totalQtd });
+                                totalQtd += product.totalQtd;
+                            });
                         }
-                        const setorInfo = setoresData.get(setor);
-                        setorInfo.products.set(codigo, { descr, totalQtd });
-                        setorInfo.totalQtd += totalQtd;
+                        setoresData.set(setor, { totalQtd: totalQtd, products: productsMap, totalLabels: 0 /* Recalculado depois */ });
                     });
 
                     const filialData = new Map();
                     filialSnapshot.forEach(doc => {
+                        const rota = doc.id.replace(/_/g, '/');
                         const data = doc.data();
-                        const { rota, filial, unidades } = data;
-
-                        if (!filialData.has(rota)) {
-                            filialData.set(rota, new Map());
+                        const filiaisMap = new Map();
+                        if (data.filiais && Array.isArray(data.filiais)) {
+                            data.filiais.forEach(filialInfo => filiaisMap.set(filialInfo.filial, filialInfo.unidades));
                         }
-                        filialData.get(rota).set(filial, unidades);
+                        filialData.set(rota, filiaisMap);
                     });
                     
-                    const sectorAnalysis = {
-                        setoresData,
-                        filialData,
-                        totalQuantidadeGeral: manifestData.totalQuantidadeGeral,
-                        totalSkusGeral: manifestData.totalSkusGeral,
-                        totalUniqueFiliais: manifestData.totalUniqueFiliais,
-                        filiaisSemFaturamento: manifestData.filiaisSemFaturamento || []
-                    };
-
-                    // 4. Reconstruir `productAnalysis.analysisData`.
                     let allAnalysisData = [];
                     if (!dataSnapshot.empty) {
                         const sortedChunks = dataSnapshot.docs.map(doc => doc.data()).sort((a, b) => a.chunkIndex - b.chunkIndex);
-                        sortedChunks.forEach(chunk => {
-                            allAnalysisData = allAnalysisData.concat(chunk.data);
-                        });
+                        sortedChunks.forEach(chunk => allAnalysisData = allAnalysisData.concat(chunk.data));
                     }
-                    const productAnalysis = {
-                        analysisData: allAnalysisData,
-                        productSalesDetails: new Map()
-                    };
+                     // Recalcular etiquetas, pois não são guardadas
+                    allAnalysisData.forEach(item => {
+                         const setor = item.setor;
+                         if (setor && labelSectors.has(setor.toUpperCase()) && setoresData.has(setor)) {
+                             const qms = item.qms > 0 ? item.qms : 1;
+                             setoresData.get(setor).totalLabels += Math.ceil(item.unidades / qms);
+                         }
+                    });
 
-                    // --- Renderização dos dados carregados (código existente) ---
+                    const sectorAnalysis = { setoresData, filialData, totalQuantidadeGeral: manifestData.totalQuantidadeGeral, totalSkusGeral: manifestData.totalSkusGeral, totalUniqueFiliais: manifestData.totalUniqueFiliais, filiaisSemFaturamento: manifestData.filiaisSemFaturamento || [] };
+                    const productAnalysis = { analysisData: allAnalysisData, productSalesDetails: new Map() /* Detalhes não partilhados */ };
+
                     appState.processedData.sectorAnalysis = sectorAnalysis;
                     appState.processedData.productAnalysis = productAnalysis;
                     
                     document.getElementById('file-control-panel').classList.add('hidden');
-                    document.getElementById('actions-container').classList.add('hidden');
-
+                    runAllAnalyses();
                     showNotification('Análise partilhada carregada.', 'success');
+                    if (manifestData.lastUpdateTime) updateTimestamp(manifestData.lastUpdateTime);
                     
-                    if (manifestData.lastUpdateTime) {
-                        updateTimestamp(manifestData.lastUpdateTime);
-                    }
-                    
-                    UIElements.containers.sectorSummary.innerHTML = `
-                        <div class="geral-summary-grid">
-                            <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(sectorAnalysis.totalQuantidadeGeral)}</div></div></div>
-                            <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(sectorAnalysis.totalSkusGeral)}</div></div></div>
-                        </div>`;
-                    displaySectorResults(sectorAnalysis);
-                    
-                    UIElements.containers.productAnalysis.innerHTML = `
-                        <div id="product-top20-geral-container"></div>
-                        <div id="product-top20-setor-container" style="margin-top: 3rem;"></div>
-                        <div id="product-search-container" style="margin-top: 3rem;">
-                            <h2>Pesquisa Livre de Produtos</h2>
-                            <div class="search-container">
-                                <input type="text" id="productSearchInput" placeholder="Pesquisar por um ou mais produtos (separar por vírgula, espaço ou ;)">
-                            </div>
-                            <div id="product-search-results-container">
-                                <div class="placeholder-card"><p>A pesquisa retornará os produtos correspondentes aqui.</p></div>
-                            </div>
-                            <div id="product-search-actions" class="hidden"></div>
-                        </div>
-                    `;
-                    displayProductAnalysisResults(productAnalysis.analysisData);
-                    const productsBySector = productAnalysis.analysisData.reduce((acc, product) => {
-                        const sector = product.setor || 'N/A';
-                        if (!acc[sector]) acc[sector] = [];
-                        acc[sector].push(product);
-                        return acc;
-                    }, {});
-                    displayTop20BySector(productsBySector);
-                    setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
-
                 } catch (error) {
                     console.error("Error loading analysis from Firebase:", error);
                     showNotification("Erro ao carregar a análise partilhada.", "error");
@@ -1925,126 +1615,60 @@
                     UIElements.loader.classList.add('hidden');
                 }
             }
-
-            function showShareLinkModal(url) {
+            
+            // ... same functions as before (export, modals, etc.)
+             function showShareLinkModal(url) {
                 const modal = document.getElementById('share-link-modal');
                 const urlInput = document.getElementById('share-link-input');
                 const copyBtn = document.getElementById('copy-link-btn');
                 const originalBtnContent = copyBtn.innerHTML;
-                
                 urlInput.value = url;
                 modal.classList.remove('hidden');
-                
                 modal.querySelector('.modal-close-btn').onclick = () => modal.classList.add('hidden');
                 modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
-                
                 copyBtn.onclick = () => {
                     urlInput.select();
-                    urlInput.setSelectionRange(0, 99999); // Para mobile
+                    urlInput.setSelectionRange(0, 99999);
                     document.execCommand('copy');
-                    showNotification('Link copiado para a área de transferência!', 'success');
+                    showNotification('Link copiado!', 'success');
                     copyBtn.textContent = 'Copiado!';
                     setTimeout(() => { copyBtn.innerHTML = originalBtnContent; }, 2000);
                 };
             }
-
             function exportToExcel(sheets, filename = 'relatorio.xlsx') {
                 try {
                     const workbook = XLSX.utils.book_new();
                     sheets.forEach(sheetInfo => {
                         if (!sheetInfo.data || sheetInfo.data.length === 0) return;
-                        
                         const header = Object.keys(sheetInfo.data[0]);
                         const aoa = [header, ...sheetInfo.data.map(row => header.map(key => row[key]))];
                         const worksheet = XLSX.utils.aoa_to_sheet(aoa);
-
-                        const colWidths = header.map((h, i) => ({
-                            wch: Math.max(h.length, ...sheetInfo.data.map(row => String(row[h] || '').length)) + 2
-                        }));
-                        worksheet['!cols'] = colWidths;
-
+                        worksheet['!cols'] = header.map((h, i) => ({ wch: Math.max(h.length, ...sheetInfo.data.map(row => String(row[h] || '').length)) + 2 }));
                         const headerStyle = { font: { bold: true, color: { rgb: "FFFFFF" }}, fill: { fgColor: { rgb: "6F42C1" } } };
-                        header.forEach((h, i) => {
-                            const cellRef = XLSX.utils.encode_cell({c: i, r: 0});
-                            if (worksheet[cellRef]) worksheet[cellRef].s = headerStyle;
-                        });
-                        
+                        header.forEach((h, i) => { const cellRef = XLSX.utils.encode_cell({c: i, r: 0}); if (worksheet[cellRef]) worksheet[cellRef].s = headerStyle; });
                         XLSX.utils.book_append_sheet(workbook, worksheet, sheetInfo.name);
                     });
-
-                    if (workbook.SheetNames.length > 0) {
-                        XLSX.writeFile(workbook, filename);
-                        showNotification(`Ficheiro Excel "${filename}" descarregado!`, 'success');
-                    } else {
-                        showNotification('Nenhum dado para exportar.', 'warning');
-                    }
-                } catch (error) {
-                    console.error("Erro ao exportar para Excel:", error);
-                    showNotification('Falha ao gerar o ficheiro Excel.', 'error');
-                }
+                    if (workbook.SheetNames.length > 0) { XLSX.writeFile(workbook, filename); showNotification(`Ficheiro Excel "${filename}" descarregado!`, 'success'); } 
+                    else { showNotification('Nenhum dado para exportar.', 'warning'); }
+                } catch (error) { console.error("Erro ao exportar para Excel:", error); showNotification('Falha ao gerar o ficheiro Excel.', 'error'); }
             }
-
             function exportToPdf(title, head, body, filename) {
                 try {
                     showNotification('A gerar PDF...', 'warning', 2000);
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
-                    doc.setFontSize(18);
-                    doc.setTextColor('#343a40');
-                    doc.text(title, 14, 22);
-
-                    doc.setFontSize(11);
-                    doc.setTextColor(100);
-                    const today = new Date().toLocaleDateString('pt-BR');
-                    doc.text(`Relatório gerado em: ${today}`, 14, 30);
-
-                    doc.autoTable({
-                        head: [head],
-                        body: body,
-                        startY: 35,
-                        theme: 'grid',
-                        headStyles: {
-                            fillColor: [111, 66, 193], // --sector-primary
-                            textColor: [255, 255, 255],
-                            fontStyle: 'bold'
-                        },
-                        styles: {
-                            fontSize: 9,
-                            cellPadding: 2,
-                            overflow: 'linebreak'
-                        },
-                        columnStyles: {
-                            // Example: 1: { cellWidth: 'auto' } for the second column
-                        }
-                    });
-
+                    doc.setFontSize(18); doc.setTextColor('#343a40'); doc.text(title, 14, 22);
+                    doc.setFontSize(11); doc.setTextColor(100); const today = new Date().toLocaleDateString('pt-BR'); doc.text(`Relatório gerado em: ${today}`, 14, 30);
+                    doc.autoTable({ head: [head], body: body, startY: 35, theme: 'grid', headStyles: { fillColor: [111, 66, 193], textColor: [255, 255, 255], fontStyle: 'bold' }, styles: { fontSize: 9, cellPadding: 2, overflow: 'linebreak' } });
                     doc.save(filename);
                     showNotification(`Ficheiro PDF "${filename}" descarregado!`, 'success');
-                } catch(error) {
-                        console.error("Erro ao gerar PDF:", error);
-                        showNotification('Falha ao gerar o ficheiro PDF.', 'error');
-                }
+                } catch(error) { console.error("Erro ao gerar PDF:", error); showNotification('Falha ao gerar o ficheiro PDF.', 'error'); }
             }
-
             function initializeEventListeners() {
-                // Adiciona o container de erro do Firebase ao DOM
-                firebaseErrorContainer = document.createElement('div');
-                firebaseErrorContainer.id = "firebase-error-container";
-                firebaseErrorContainer.className = "hidden";
-                firebaseErrorContainer.style.textAlign = 'center';
-                firebaseErrorContainer.style.padding = '1rem';
-                firebaseErrorContainer.style.backgroundColor = 'var(--error-color)';
-                firebaseErrorContainer.style.color = 'white';
-                firebaseErrorContainer.style.borderRadius = 'var(--border-radius)';
-                firebaseErrorContainer.style.marginBottom = '1.5rem';
-                UIElements.fileControl.panel.insertAdjacentElement('beforebegin', firebaseErrorContainer);
-                
                 UIElements.fileControl.header.addEventListener('click', () => {
                     UIElements.fileControl.panel.classList.toggle('open');
                     UIElements.fileControl.icon.textContent = UIElements.fileControl.panel.classList.contains('open') ? '▲' : '▼';
                 });
-                
                 Object.keys(UIElements.dropAreas).forEach(key => setupFileDropArea(UIElements.dropAreas[key], UIElements.inputs[key]));
                 UIElements.inputs.orders.addEventListener('change', handleOrdersFile);
                 UIElements.inputs.status.addEventListener('change', handleStatusFile);
@@ -2052,28 +1676,20 @@
                 UIElements.inputs.address.addEventListener('change', handleAddressFile);
                 UIElements.inputs.productMaster.addEventListener('change', handleProductMasterFile);
                 UIElements.inputs.sharedFile.addEventListener('change', handleSharedFile);
-                
                 UIElements.buttons.reloadFiles.addEventListener('click', () => {
                     Object.keys(localStorage).forEach(key => localStorage.removeItem(key));
                     window.location.href = window.location.href.split('?')[0];
                 });
-
                 if (UIElements.buttons.shareOnline) {
                     UIElements.buttons.shareOnline.addEventListener('click', saveAnalysisToFirebase);
                 }
-
                 document.body.addEventListener('click', e => {
                     const copyImageButton = e.target.closest('.copy-image-btn');
-                    
                     if (copyImageButton) {
                         const targetSelector = copyImageButton.dataset.target;
                         const filename = copyImageButton.dataset.filename || 'relatorio.png';
                         const elementToCopy = document.querySelector(targetSelector);
-                        if (!elementToCopy) {
-                            showNotification('Erro: Elemento do relatório não encontrado.', 'error');
-                            return;
-                        }
-                        
+                        if (!elementToCopy) { showNotification('Erro: Elemento do relatório não encontrado.', 'error'); return; }
                         showNotification('A gerar imagem...', 'warning', 2000);
                         html2canvas(elementToCopy, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
                             .then(canvas => {
@@ -2082,24 +1698,12 @@
                                 link.href = canvas.toDataURL('image/png');
                                 link.click();
                                 showNotification('Imagem descarregada!', 'success');
-                            }).catch(err => {
-                                console.error("Erro do html2canvas:", err);
-                                showNotification('Falha ao gerar a imagem.', 'error');
-                            });
+                            }).catch(err => { console.error("Erro do html2canvas:", err); showNotification('Falha ao gerar a imagem.', 'error'); });
                     }
                 });
-
-
                 if (UIElements.buttons.exportData) {
                     UIElements.buttons.exportData.addEventListener('click', () => {
-                        const dataToShare = {
-                            ordersData: appState.ordersData,
-                            nonReturnedOrders: Array.from(appState.nonReturnedOrders),
-                            sectorData: appState.sectorData,
-                            addressData: Array.from(appState.addressData.entries()),
-                            productMasterData: Array.from(appState.productMasterData.entries()),
-                            lastUpdateTime: localStorage.getItem('lastUpdateTime')
-                        };
+                        const dataToShare = { ordersData: appState.ordersData, nonReturnedOrders: Array.from(appState.nonReturnedOrders), sectorData: appState.sectorData, addressData: Array.from(appState.addressData.entries()), productMasterData: Array.from(appState.productMasterData.entries()), lastUpdateTime: localStorage.getItem('lastUpdateTime') };
                         const blob = new Blob([JSON.stringify(dataToShare)], {type: 'application/json'});
                         const url = URL.createObjectURL(blob);
                         const link = document.createElement('a');
@@ -2110,67 +1714,35 @@
                         showNotification('Ficheiro de partilha (.json) descarregado!', 'success');
                     });
                 }
-                
                 if (UIElements.buttons.dailyReport) {
                     UIElements.buttons.dailyReport.addEventListener('click', () => {
-                        if (!appState.processedData.sectorAnalysis || !appState.processedData.productAnalysis) {
-                            showNotification('Carregue as planilhas de Itens e Endereços para gerar o relatório.', 'error');
-                            return;
-                        }
+                        if (!appState.processedData.sectorAnalysis || !appState.processedData.productAnalysis) { showNotification('Carregue as planilhas de Itens e Endereços para gerar o relatório.', 'error'); return; }
                         showNotification('A gerar relatório diário...', 'warning', 2000);
-
                         const sheets = [];
-                        // 1. Faturamento por Rota
                         const { filialData } = appState.processedData.sectorAnalysis;
                         const faturamentoPorRota = new Map();
-                        for (const [rota, filiais] of filialData.entries()) {
-                            faturamentoPorRota.set(rota, [...filiais.values()].reduce((a, b) => a + b, 0));
-                        }
-                        const rotaData = Array.from(faturamentoPorRota.entries())
-                            .map(([rota, unidades]) => ({'Rota': rota, 'Total Unidades': unidades}))
-                            .sort((a,b) => Number(a.Rota) - Number(b.Rota));
+                        for (const [rota, filiais] of filialData.entries()) faturamentoPorRota.set(rota, [...filiais.values()].reduce((a, b) => a + b, 0));
+                        const rotaData = Array.from(faturamentoPorRota.entries()).map(([rota, unidades]) => ({'Rota': rota, 'Total Unidades': unidades})).sort((a,b) => Number(a.Rota) - Number(b.Rota));
                         if(rotaData.length > 0) sheets.push({ name: 'Faturamento por Rota', data: rotaData });
-
-                        // 2. Faturamento por Setor
                         const { setoresData } = appState.processedData.sectorAnalysis;
-                            const setorData = [...setoresData.entries()]
-                                    .map(([setor, data]) => ({'Setor': setor, 'Total Unidades': data.totalQtd, 'Total SKUs': data.products.size}))
-                                    .sort((a,b) => getOrder(a.Setor) - getOrder(b.Setor));
+                        const setorData = [...setoresData.entries()].map(([setor, data]) => ({'Setor': setor, 'Total Unidades': data.totalQtd, 'Total SKUs': data.products.size})).sort((a,b) => getOrder(a.Setor) - getOrder(b.Setor));
                         if(setorData.length > 0) sheets.push({ name: 'Faturamento por Setor', data: setorData });
-
-                        // 3. Maiores SKUs (Top 50)
                         const { analysisData } = appState.processedData.productAnalysis;
-                        const top50SKUs = analysisData.slice(0, 50).map(item => ({
-                            'Código': item.codigo,
-                            'SKU': item.skus,
-                            'Unidades': item.unidades,
-                            'Caixas (QMS)': parseFloat(item.cx.toFixed(2)),
-                            'Setor': item.setor,
-                            'Posição': item.posicao
-                        }));
+                        const top50SKUs = analysisData.slice(0, 50).map(item => ({ 'Código': item.codigo, 'SKU': item.skus, 'Unidades': item.unidades, 'Caixas (QMS)': parseFloat(item.cx.toFixed(2)), 'Setor': item.setor, 'Posição': item.posicao }));
                         if(top50SKUs.length > 0) sheets.push({ name: 'Top 50 SKUs', data: top50SKUs });
-
                         const today = new Date().toISOString().slice(0, 10);
                         exportToExcel(sheets, `Relatorio_Diario_${today}.xlsx`);
                     });
                 }
-
             }
 
             document.addEventListener('DOMContentLoaded', () => {
                 initializeEventListeners();
-
                 const urlParams = new URLSearchParams(window.location.search);
                 const analysisId = urlParams.get('analysis');
-
                 if (analysisId) {
-                    // Se um ID de análise estiver no URL, carregar do Firebase
-                    // Um pequeno atraso para garantir que a autenticação do Firebase inicializou
-                    setTimeout(() => {
-                        loadAnalysisFromFirebase(analysisId);
-                    }, 500);
+                    setTimeout(() => { loadAnalysisFromFirebase(analysisId); }, 500);
                 } else {
-                    // Caso contrário, carregar do localStorage como de costume
                     loadDataFromStorage();
                 }
             });
@@ -2178,5 +1750,4 @@
     </script>
 </body>
 </html>
-
 
