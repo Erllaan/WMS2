@@ -903,7 +903,6 @@
             }
             
             function runValidationAnalysis() {
-                // ... same logic as before ...
                  if (appState.ordersData.length === 0 || appState.nonReturnedOrders.size === 0) {
                     UIElements.containers.validationResults.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Pedidos</strong> e a <strong>Planilha de Status</strong> para iniciar a validação.</p></div>`;
                     UIElements.containers.validationSummary.innerHTML = '';
@@ -949,9 +948,7 @@
             }
 
             function runSectorAnalysis() {
-                // ... same logic as before ...
                 if (appState.sectorData.length === 0) {
-                    // Hide sections if no data
                     return;
                 }
 
@@ -1017,7 +1014,6 @@
             }
 
             function runProductAnalysis() {
-                // ... same logic as before ...
                  if (appState.sectorData.length === 0) {
                     return;
                 }
@@ -1056,7 +1052,6 @@
             }
             
             function displayValidationRouteResults(rotasData, container) {
-                // ... same as before
                 container.innerHTML = "";
                 const sortedRotas = Object.keys(rotasData).sort((a, b) => Number(a) - Number(b));
                 sortedRotas.forEach(rota => {
@@ -1101,7 +1096,6 @@
                 filialContainer.innerHTML = '';
                 noBillingContainer.innerHTML = '';
                 
-                // --- Sector Analysis ---
                 if (setoresData.size > 0) {
                     const sectorsByUnits = [...setoresData.entries()].sort((a, b) => b[1].totalQtd - a[1].totalQtd);
                     const threatMap = new Map();
@@ -1120,7 +1114,6 @@
                     sectorContainer.innerHTML = `<div class='placeholder-card'><p>Carregue a <strong>Planilha de Endereços</strong> para visualizar o acompanhamento por setor.</p></div>`;
                 }
 
-                // --- Label Analysis ---
                 const sortedSetoresForLabels = [...setoresData.entries()].sort((a, b) => getOrder(a[0]) - getOrder(b[0]) || a[0].localeCompare(b[0]));
                 const labelSectorsData = sortedSetoresForLabels.filter(([setor]) => labelSectors.has(setor.toUpperCase()));
                 if (labelSectorsData.length > 0) {
@@ -1135,7 +1128,6 @@
                      labelContainer.innerHTML = ``;
                 }
 
-                // --- Filial Analysis ---
                 if (filialData && filialData.size > 0) {
                     const sortedRotas = [...filialData.keys()].sort((a, b) => Number(a) - Number(b));
                     const filialAccordionsHTML = sortedRotas.map((rota, index) => {
@@ -1151,7 +1143,6 @@
                     filialContainer.innerHTML = `<h2>Faturamento por Filiais</h2><div class='placeholder-card'><p>A <strong>Planilha de Itens</strong> precisa conter as colunas "Loja Cross" ou "Código da Loja" para esta análise.</p></div>`;
                 }
 
-                // --- No-Billing Analysis ---
                 if (filiaisSemFaturamento && filiaisSemFaturamento.length > 0) {
                     const listaFiliais = filiaisSemFaturamento.sort().map(filial => `<li>${filial}</li>`).join('');
                     noBillingContainer.innerHTML = `<h2>Filiais Sem Faturamento</h2><div class="summary-card"><h2>Atenção</h2><p>${filiaisSemFaturamento.length} filiais não apresentaram faturamento no período.</p></div><div class="sector-detail-card"><div class="sector-detail-card-header"><h3>Lista de Filiais</h3></div><div class="table-wrapper"><ul style="padding: 1.5rem 1.5rem 1.5rem 3rem; margin: 0; font-size: 0.9em; list-style-type: disc;">${listaFiliais}</ul></div></div>`;
@@ -1160,22 +1151,18 @@
                 }
             }
             
-            // ... the rest of the functions (displayProductAnalysisResults, etc.) remain the same
             function displayProductAnalysisResults(data) {
                 const top20Data = data.slice(0, 20);
                 const top20Container = document.getElementById('product-top20-geral-container');
                 top20Container.innerHTML = `<h2>Maiores Saídas por SKU (Top 20)</h2>`;
-                
                 if (top20Data.length === 0) {
                     top20Container.innerHTML += `<div class="placeholder-card"><p>Sem dados de produtos para exibir.</p></div>`;
                     return;
                 }
-
                 const tableRows = top20Data.map(item => `<tr><td>${item.codigo}</td><td>${item.skus}</td><td class="text-right">${formatNumber(item.unidades)}</td><td class="text-right">${formatNumber(item.qms)}</td><td class="text-right">${item.cx.toFixed(1).replace('.',',')}</td><td class="text-right">${item.percent.toFixed(2).replace('.', ',')}%</td><td>${item.setor}</td><td>${item.posicao}</td></tr>`).join('');
                 const totalUnidades = top20Data.reduce((sum, item) => sum + item.unidades, 0);
                 const totalCx = top20Data.reduce((sum, item) => sum + item.cx, 0);
                 const totalPercent = top20Data.reduce((sum, item) => sum + item.percent, 0);
-
                 top20Container.innerHTML += `<button class="copy-image-btn" data-target="#product-top20-geral-table-wrapper" data-filename="top_20_skus_geral.png"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>Copiar como Imagem</button><div class="table-responsive-wrapper" id="product-top20-geral-table-wrapper"><table id="product-top20-geral-table"><thead><tr><th>Código</th><th>SKUS</th><th class="text-right">Unidades</th><th class="text-right">QMS</th><th class="text-right">CX</th><th class="text-right">%</th><th>Setor</th><th>Posição</th></tr></thead><tbody>${tableRows}</tbody><tfoot><tr><td colspan="2"><strong>TOTAL (TOP 20)</strong></td><td class="text-right"><strong>${formatNumber(totalUnidades)}</strong></td><td></td><td class="text-right"><strong>${totalCx.toFixed(1).replace('.',',')}</strong></td><td class="text-right"><strong>${totalPercent.toFixed(2).replace('.', ',')}%</strong></td><td colspan="2"></td></tr></tfoot></table></div>`;
             }
 
@@ -1487,21 +1474,19 @@
                         const { setoresData, filialData } = sectorAnalysis;
                         const analysisData = productAnalysis.analysisData;
 
-                        // OTIMIZAÇÃO: Salvar dados de setor de forma consolidada
                         const sectorDetailsRef = collection(db, "shared_analyses", analysisId, "sector_details");
                         for (const [setor, data] of setoresData.entries()) {
                             const productsArray = Array.from(data.products.entries()).map(([codigo, productData]) => ({ codigo: codigo, descr: productData.descr, totalQtd: productData.totalQtd }));
-                            const sectorDocRef = doc(sectorDetailsRef, setor.replace(/\//g, '_')); // Sanitize doc ID
+                            const sectorDocRef = doc(sectorDetailsRef, setor.replace(/\//g, '_')); 
                             batch.set(sectorDocRef, { products: productsArray });
                             operationCount++;
                             commitBatchIfNeeded();
                         }
 
-                        // OTIMIZAÇÃO: Salvar dados de filial de forma consolidada
                         const filialDetailsRef = collection(db, "shared_analyses", analysisId, "filial_details");
                         for (const [rota, filiais] of filialData.entries()) {
                             const filiaisArray = Array.from(filiais.entries()).map(([filial, unidades]) => ({ filial: filial, unidades: unidades }));
-                            const rotaDocRef = doc(filialDetailsRef, rota.replace(/\//g, '_')); // Sanitize doc ID
+                            const rotaDocRef = doc(filialDetailsRef, rota.replace(/\//g, '_')); 
                             batch.set(rotaDocRef, { filiais: filiaisArray });
                             operationCount++;
                             commitBatchIfNeeded();
@@ -1549,7 +1534,11 @@
                 try {
                     const manifestDocRef = doc(db, "shared_analyses", analysisId);
                     const manifestSnap = await getDoc(manifestDocRef);
-                    if (!manifestSnap.exists()) { showNotification("Análise não encontrada.", "error"); return; }
+                    if (!manifestSnap.exists()) { 
+                        showNotification("Análise não encontrada.", "error"); 
+                        UIElements.loader.classList.add('hidden');
+                        return;
+                    }
                     const manifestData = manifestSnap.data();
 
                     const sectorDetailsRef = collection(db, "shared_analyses", analysisId, "sector_details");
@@ -1569,7 +1558,7 @@
                                 totalQtd += product.totalQtd;
                             });
                         }
-                        setoresData.set(setor, { totalQtd: totalQtd, products: productsMap, totalLabels: 0 /* Recalculado depois */ });
+                        setoresData.set(setor, { totalQtd: totalQtd, products: productsMap, totalLabels: 0 });
                     });
 
                     const filialData = new Map();
@@ -1588,7 +1577,6 @@
                         const sortedChunks = dataSnapshot.docs.map(doc => doc.data()).sort((a, b) => a.chunkIndex - b.chunkIndex);
                         sortedChunks.forEach(chunk => allAnalysisData = allAnalysisData.concat(chunk.data));
                     }
-                     // Recalcular etiquetas, pois não são guardadas
                     allAnalysisData.forEach(item => {
                          const setor = item.setor;
                          if (setor && labelSectors.has(setor.toUpperCase()) && setoresData.has(setor)) {
@@ -1598,13 +1586,42 @@
                     });
 
                     const sectorAnalysis = { setoresData, filialData, totalQuantidadeGeral: manifestData.totalQuantidadeGeral, totalSkusGeral: manifestData.totalSkusGeral, totalUniqueFiliais: manifestData.totalUniqueFiliais, filiaisSemFaturamento: manifestData.filiaisSemFaturamento || [] };
-                    const productAnalysis = { analysisData: allAnalysisData, productSalesDetails: new Map() /* Detalhes não partilhados */ };
+                    const productAnalysis = { analysisData: allAnalysisData, productSalesDetails: new Map() };
 
                     appState.processedData.sectorAnalysis = sectorAnalysis;
                     appState.processedData.productAnalysis = productAnalysis;
                     
+                    // --- CORREÇÃO: Lógica de renderização direta ---
+                    UIElements.containers.initialPlaceholder.classList.add('hidden');
+                    UIElements.containers.fullAnalysis.classList.remove('hidden');
                     document.getElementById('file-control-panel').classList.add('hidden');
-                    runAllAnalyses();
+                    
+                    UIElements.sections.validation.classList.add('hidden'); // Validation not shared
+                    UIElements.sections.generalSummary.classList.remove('hidden');
+                    UIElements.sections.sector.classList.remove('hidden');
+                    UIElements.sections.label.classList.remove('hidden');
+                    UIElements.sections.filial.classList.remove('hidden');
+                    UIElements.sections.noBilling.classList.remove('hidden');
+                    UIElements.sections.product.classList.remove('hidden');
+
+                    UIElements.containers.sectorSummary.innerHTML = `
+                        <div class="geral-summary-grid">
+                            <div class="geral-summary-card"><div class="icon sector"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div><div class="info"><p>Quantidade Total</p><div class="value">${formatNumber(sectorAnalysis.totalQuantidadeGeral)}</div></div></div>
+                            <div class="geral-summary-card"><div class="icon skus"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 20v2"/><path d="M5 12H3"/><path d="M21 12h-2"/><path d="m18.36 5.64-.18-.18"/><path d="m5.82 18.18-.18-.18"/><path d="m18.18 18.18-.18.18"/><path d="m5.64 5.64-.18.18"/></svg></div><div class="info"><p>Total de SKUs Analisados</p><div class="value">${formatNumber(sectorAnalysis.totalSkusGeral)}</div></div></div>
+                        </div>`;
+
+                    displaySectorResults(sectorAnalysis);
+                    displayProductAnalysisResults(productAnalysis.analysisData);
+                    const productsBySector = productAnalysis.analysisData.reduce((acc, product) => {
+                        const sector = product.setor || 'N/A';
+                        if (!acc[sector]) acc[sector] = [];
+                        acc[sector].push(product);
+                        return acc;
+                    }, {});
+                    displayTop20BySector(productsBySector);
+                    setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
+                    // --- Fim da correção ---
+
                     showNotification('Análise partilhada carregada.', 'success');
                     if (manifestData.lastUpdateTime) updateTimestamp(manifestData.lastUpdateTime);
                     
@@ -1616,54 +1633,6 @@
                 }
             }
             
-            // ... same functions as before (export, modals, etc.)
-             function showShareLinkModal(url) {
-                const modal = document.getElementById('share-link-modal');
-                const urlInput = document.getElementById('share-link-input');
-                const copyBtn = document.getElementById('copy-link-btn');
-                const originalBtnContent = copyBtn.innerHTML;
-                urlInput.value = url;
-                modal.classList.remove('hidden');
-                modal.querySelector('.modal-close-btn').onclick = () => modal.classList.add('hidden');
-                modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
-                copyBtn.onclick = () => {
-                    urlInput.select();
-                    urlInput.setSelectionRange(0, 99999);
-                    document.execCommand('copy');
-                    showNotification('Link copiado!', 'success');
-                    copyBtn.textContent = 'Copiado!';
-                    setTimeout(() => { copyBtn.innerHTML = originalBtnContent; }, 2000);
-                };
-            }
-            function exportToExcel(sheets, filename = 'relatorio.xlsx') {
-                try {
-                    const workbook = XLSX.utils.book_new();
-                    sheets.forEach(sheetInfo => {
-                        if (!sheetInfo.data || sheetInfo.data.length === 0) return;
-                        const header = Object.keys(sheetInfo.data[0]);
-                        const aoa = [header, ...sheetInfo.data.map(row => header.map(key => row[key]))];
-                        const worksheet = XLSX.utils.aoa_to_sheet(aoa);
-                        worksheet['!cols'] = header.map((h, i) => ({ wch: Math.max(h.length, ...sheetInfo.data.map(row => String(row[h] || '').length)) + 2 }));
-                        const headerStyle = { font: { bold: true, color: { rgb: "FFFFFF" }}, fill: { fgColor: { rgb: "6F42C1" } } };
-                        header.forEach((h, i) => { const cellRef = XLSX.utils.encode_cell({c: i, r: 0}); if (worksheet[cellRef]) worksheet[cellRef].s = headerStyle; });
-                        XLSX.utils.book_append_sheet(workbook, worksheet, sheetInfo.name);
-                    });
-                    if (workbook.SheetNames.length > 0) { XLSX.writeFile(workbook, filename); showNotification(`Ficheiro Excel "${filename}" descarregado!`, 'success'); } 
-                    else { showNotification('Nenhum dado para exportar.', 'warning'); }
-                } catch (error) { console.error("Erro ao exportar para Excel:", error); showNotification('Falha ao gerar o ficheiro Excel.', 'error'); }
-            }
-            function exportToPdf(title, head, body, filename) {
-                try {
-                    showNotification('A gerar PDF...', 'warning', 2000);
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-                    doc.setFontSize(18); doc.setTextColor('#343a40'); doc.text(title, 14, 22);
-                    doc.setFontSize(11); doc.setTextColor(100); const today = new Date().toLocaleDateString('pt-BR'); doc.text(`Relatório gerado em: ${today}`, 14, 30);
-                    doc.autoTable({ head: [head], body: body, startY: 35, theme: 'grid', headStyles: { fillColor: [111, 66, 193], textColor: [255, 255, 255], fontStyle: 'bold' }, styles: { fontSize: 9, cellPadding: 2, overflow: 'linebreak' } });
-                    doc.save(filename);
-                    showNotification(`Ficheiro PDF "${filename}" descarregado!`, 'success');
-                } catch(error) { console.error("Erro ao gerar PDF:", error); showNotification('Falha ao gerar o ficheiro PDF.', 'error'); }
-            }
             function initializeEventListeners() {
                 UIElements.fileControl.header.addEventListener('click', () => {
                     UIElements.fileControl.panel.classList.toggle('open');
