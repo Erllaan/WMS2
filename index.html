@@ -1475,21 +1475,37 @@
                         const analysisData = productAnalysis.analysisData;
 
                         const sectorDetailsRef = collection(db, "shared_analyses", analysisId, "sector_details");
+                        const productChunkSize = 1500;
                         for (const [setor, data] of setoresData.entries()) {
                             const productsArray = Array.from(data.products.entries()).map(([codigo, productData]) => ({ codigo: codigo, descr: productData.descr, totalQtd: productData.totalQtd }));
-                            const sectorDocRef = doc(sectorDetailsRef, setor.replace(/\//g, '_')); 
-                            batch.set(sectorDocRef, { products: productsArray });
-                            operationCount++;
-                            commitBatchIfNeeded();
+                            if (productsArray.length > 0) {
+                                for (let i = 0; i < productsArray.length; i += productChunkSize) {
+                                    const chunk = productsArray.slice(i, i + productChunkSize);
+                                    const sanitizedSectorName = setor.replace(/\//g, '_');
+                                    const chunkIndex = i / productChunkSize;
+                                    const sectorDocRef = doc(sectorDetailsRef, `${sanitizedSectorName}_${chunkIndex}`);
+                                    batch.set(sectorDocRef, { products: chunk });
+                                    operationCount++;
+                                    commitBatchIfNeeded();
+                                }
+                            }
                         }
 
                         const filialDetailsRef = collection(db, "shared_analyses", analysisId, "filial_details");
+                        const filialChunkSize = 4000;
                         for (const [rota, filiais] of filialData.entries()) {
                             const filiaisArray = Array.from(filiais.entries()).map(([filial, unidades]) => ({ filial: filial, unidades: unidades }));
-                            const rotaDocRef = doc(filialDetailsRef, rota.replace(/\//g, '_')); 
-                            batch.set(rotaDocRef, { filiais: filiaisArray });
-                            operationCount++;
-                            commitBatchIfNeeded();
+                             if (filiaisArray.length > 0) {
+                                for (let i = 0; i < filiaisArray.length; i += filialChunkSize) {
+                                    const chunk = filiaisArray.slice(i, i + filialChunkSize);
+                                    const sanitizedRota = rota.replace(/\//g, '_');
+                                    const chunkIndex = i / filialChunkSize;
+                                    const rotaDocRef = doc(filialDetailsRef, `${sanitizedRota}_${chunkIndex}`);
+                                    batch.set(rotaDocRef, { filiais: chunk });
+                                    operationCount++;
+                                    commitBatchIfNeeded();
+                                }
+                            }
                         }
                         
                         const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
@@ -1548,28 +1564,39 @@
 
                     const setoresData = new Map();
                     sectorSnapshot.forEach(doc => {
-                        const setor = doc.id.replace(/_/g, '/');
+                        const docId = doc.id;
+                        const baseName = docId.replace(/_\d+$/, ''); 
+                        const setor = baseName.replace(/_/g, '/');
                         const data = doc.data();
-                        const productsMap = new Map();
-                        let totalQtd = 0;
+
+                        if (!setoresData.has(setor)) {
+                            setoresData.set(setor, { totalQtd: 0, products: new Map(), totalLabels: 0 });
+                        }
+                        
+                        const setorInfo = setoresData.get(setor);
                         if (data.products && Array.isArray(data.products)) {
                             data.products.forEach(product => {
-                                productsMap.set(product.codigo, { descr: product.descr, totalQtd: product.totalQtd });
-                                totalQtd += product.totalQtd;
+                                setorInfo.products.set(product.codigo, { descr: product.descr, totalQtd: product.totalQtd });
+                                setorInfo.totalQtd += product.totalQtd;
                             });
                         }
-                        setoresData.set(setor, { totalQtd: totalQtd, products: productsMap, totalLabels: 0 });
                     });
 
                     const filialData = new Map();
                     filialSnapshot.forEach(doc => {
-                        const rota = doc.id.replace(/_/g, '/');
+                        const docId = doc.id;
+                        const baseName = docId.replace(/_\d+$/, '');
+                        const rota = baseName.replace(/_/g, '/');
                         const data = doc.data();
-                        const filiaisMap = new Map();
+                        
+                        if (!filialData.has(rota)) {
+                            filialData.set(rota, new Map());
+                        }
+
+                        const filiaisMap = filialData.get(rota);
                         if (data.filiais && Array.isArray(data.filiais)) {
                             data.filiais.forEach(filialInfo => filiaisMap.set(filialInfo.filial, filialInfo.unidades));
                         }
-                        filialData.set(rota, filiaisMap);
                     });
                     
                     let allAnalysisData = [];
@@ -1591,12 +1618,11 @@
                     appState.processedData.sectorAnalysis = sectorAnalysis;
                     appState.processedData.productAnalysis = productAnalysis;
                     
-                    // --- CORREÇÃO: Lógica de renderização direta ---
                     UIElements.containers.initialPlaceholder.classList.add('hidden');
                     UIElements.containers.fullAnalysis.classList.remove('hidden');
                     document.getElementById('file-control-panel').classList.add('hidden');
                     
-                    UIElements.sections.validation.classList.add('hidden'); // Validation not shared
+                    UIElements.sections.validation.classList.add('hidden');
                     UIElements.sections.generalSummary.classList.remove('hidden');
                     UIElements.sections.sector.classList.remove('hidden');
                     UIElements.sections.label.classList.remove('hidden');
@@ -1620,8 +1646,7 @@
                     }, {});
                     displayTop20BySector(productsBySector);
                     setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
-                    // --- Fim da correção ---
-
+                   
                     showNotification('Análise partilhada carregada.', 'success');
                     if (manifestData.lastUpdateTime) updateTimestamp(manifestData.lastUpdateTime);
                     
