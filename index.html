@@ -273,8 +273,8 @@
             }
 
             .content-section {
-                 padding: 1.5rem;
-                 margin-bottom: 2rem;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
             }
 
             h2 {
@@ -546,14 +546,13 @@
 
     <script type="module">
         // IIFE para encapsular o código
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, getDocs, addDoc, collection, writeBatch, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, getDocs, collection, writeBatch, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         (function() {
             // --- Firebase Initialization ---
             let db, auth;
-            let firebaseErrorContainer; 
 
             try {
                 const firebaseConfig = {
@@ -904,10 +903,10 @@
             
             function runValidationAnalysis() {
                  if (appState.ordersData.length === 0 || appState.nonReturnedOrders.size === 0) {
-                    UIElements.containers.validationResults.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Pedidos</strong> e a <strong>Planilha de Status</strong> para iniciar a validação.</p></div>`;
-                    UIElements.containers.validationSummary.innerHTML = '';
-                    return;
-                }
+                     UIElements.containers.validationResults.innerHTML = `<div class="placeholder-card"><p>Carregue a <strong>Planilha de Pedidos</strong> e a <strong>Planilha de Status</strong> para iniciar a validação.</p></div>`;
+                     UIElements.containers.validationSummary.innerHTML = '';
+                     return;
+                 }
                 
                 const filteredData = appState.ordersData.filter(row => {
                     const orderId = String(row['C. Legado'] || '').trim();
@@ -1015,8 +1014,8 @@
 
             function runProductAnalysis() {
                  if (appState.sectorData.length === 0) {
-                    return;
-                }
+                     return;
+                 }
                 const productQuantities = new Map();
                 const productDescriptions = new Map();
                 const productSalesDetails = new Map();
@@ -1169,9 +1168,9 @@
             function displayTop20BySector(productsBySector) {
                 const container = document.getElementById('product-top20-setor-container');
                  if (Object.keys(productsBySector).length === 0) {
-                    container.innerHTML = ``;
-                    return;
-                }
+                     container.innerHTML = ``;
+                     return;
+                 }
                 container.innerHTML = `<h2>Top 20 Saídas por Setor</h2><div class="search-container"><input type="text" id="sectorSearchInput" placeholder="Pesquisar por setor..."></div>`;
                 const sortedSectors = Object.keys(productsBySector).sort((a,b) => getOrder(a) - getOrder(b));
                 const grid = document.createElement('div');
@@ -1199,9 +1198,9 @@
 
             function setupProductSearch(fullProductList, productSalesDetails) {
                  if (fullProductList.length === 0) {
-                    document.getElementById('product-search-container').innerHTML = '';
-                    return;
-                }
+                     document.getElementById('product-search-container').innerHTML = '';
+                     return;
+                 }
                 const searchInput = document.getElementById('productSearchInput');
                 const resultsContainer = document.getElementById('product-search-results-container');
                 const actionsContainer = document.getElementById('product-search-actions');
@@ -1406,41 +1405,25 @@
                 }
             }
             
+            // ===================================================================
+            //  FUNÇÃO CORRIGIDA - INÍCIO
+            // ===================================================================
             async function saveAnalysisToFirebase() {
-                if (!db) { showNotification("Serviço de partilha indisponível.", "error"); return; }
+                if (!db || !auth.currentUser) {
+                    showNotification("Serviço de partilha indisponível ou utilizador não autenticado.", "error");
+                    return;
+                }
                 if (!appState.processedData.sectorAnalysis || !appState.processedData.productAnalysis) {
                     showNotification('Execute pelo menos uma análise antes de partilhar.', 'error');
                     return;
                 }
                 const lastId = localStorage.getItem('lastSharedAnalysisId');
+                
                 const performShare = async (mode, existingId = null) => {
                     UIElements.loader.classList.remove('hidden');
                     try {
                         let analysisId = existingId;
-                        if (mode === 'update' && existingId) {
-                            showNotification('A atualizar a partilha existente... a apagar dados antigos.', 'warning');
-                            const subcollections = ['sector_details', 'filial_details', 'data_chunks'];
-                            for (const sub of subcollections) {
-                                const subRef = collection(db, "shared_analyses", existingId, sub);
-                                const snapshot = await getDocs(subRef);
-                                const deletePromises = [];
-                                let batch = writeBatch(db);
-                                let count = 0;
-                                snapshot.forEach(doc => {
-                                    batch.delete(doc.ref);
-                                    count++;
-                                    if (count >= 499) {
-                                        deletePromises.push(batch.commit());
-                                        batch = writeBatch(db);
-                                        count = 0;
-                                    }
-                                });
-                                if (count > 0) deletePromises.push(batch.commit());
-                                await Promise.all(deletePromises);
-                            }
-                        }
                         
-                        showNotification('A preparar e a enviar os novos dados...', 'warning');
                         const { sectorAnalysis, productAnalysis } = appState.processedData;
                         const manifestData = {
                             totalQuantidadeGeral: sectorAnalysis.totalQuantidadeGeral,
@@ -1449,65 +1432,71 @@
                             filiaisSemFaturamento: sectorAnalysis.filiaisSemFaturamento || [],
                             lastUpdateTime: localStorage.getItem('lastUpdateTime') || new Date().toISOString(),
                             createdAt: new Date().toISOString(),
-                            userId: auth.currentUser ? auth.currentUser.uid : null
+                            userId: auth.currentUser.uid
                         };
+                        
                         if (mode === 'create_new') {
                              const newDocRef = doc(collection(db, "shared_analyses"));
                              analysisId = newDocRef.id;
                         }
-                        
+
                         const manifestDocRef = doc(db, "shared_analyses", analysisId);
+                        await setDoc(manifestDocRef, manifestData, { merge: mode === 'update' });
+                        showNotification('Manifesto da análise guardado. A enviar dados...', 'warning');
+
+                        if (mode === 'update' && existingId) {
+                            showNotification('A apagar dados antigos da partilha...', 'warning');
+                            const subcollections = ['sector_details', 'filial_details', 'data_chunks'];
+                            for (const sub of subcollections) {
+                                const subRef = collection(db, "shared_analyses", existingId, sub);
+                                const snapshot = await getDocs(subRef);
+                                if (snapshot.empty) continue;
+
+                                const deleteBatch = writeBatch(db);
+                                snapshot.forEach(doc => deleteBatch.delete(doc.ref));
+                                await deleteBatch.commit();
+                            }
+                        }
+
+                        showNotification('A enviar detalhes da análise...', 'warning');
                         const allBatches = [];
                         let batch = writeBatch(db);
                         let operationCount = 0;
-                        batch.set(manifestDocRef, manifestData);
-                        operationCount++;
 
                         const commitBatchIfNeeded = () => {
-                            if (operationCount > 0 && operationCount >= 499) {
+                            if (operationCount >= 499) {
                                 allBatches.push(batch.commit());
                                 batch = writeBatch(db);
                                 operationCount = 0;
                             }
                         };
-                        
+
                         const { setoresData, filialData } = sectorAnalysis;
-                        const analysisData = productAnalysis.analysisData;
-
                         const sectorDetailsRef = collection(db, "shared_analyses", analysisId, "sector_details");
-                        const productChunkSize = 1500;
                         for (const [setor, data] of setoresData.entries()) {
-                            const productsArray = Array.from(data.products.entries()).map(([codigo, productData]) => ({ codigo: codigo, descr: productData.descr, totalQtd: productData.totalQtd }));
+                            const productsArray = Array.from(data.products.entries()).map(([codigo, productData]) => ({ codigo, ...productData }));
                             if (productsArray.length > 0) {
-                                for (let i = 0; i < productsArray.length; i += productChunkSize) {
-                                    const chunk = productsArray.slice(i, i + productChunkSize);
-                                    const sanitizedSectorName = setor.replace(/\//g, '_');
-                                    const chunkIndex = i / productChunkSize;
-                                    const sectorDocRef = doc(sectorDetailsRef, `${sanitizedSectorName}_${chunkIndex}`);
-                                    batch.set(sectorDocRef, { products: chunk });
-                                    operationCount++;
-                                    commitBatchIfNeeded();
-                                }
-                            }
-                        }
-
-                        const filialDetailsRef = collection(db, "shared_analyses", analysisId, "filial_details");
-                        const filialChunkSize = 4000;
-                        for (const [rota, filiais] of filialData.entries()) {
-                            const filiaisArray = Array.from(filiais.entries()).map(([filial, unidades]) => ({ filial: filial, unidades: unidades }));
-                             if (filiaisArray.length > 0) {
-                                for (let i = 0; i < filiaisArray.length; i += filialChunkSize) {
-                                    const chunk = filiaisArray.slice(i, i + filialChunkSize);
-                                    const sanitizedRota = rota.replace(/\//g, '_');
-                                    const chunkIndex = i / filialChunkSize;
-                                    const rotaDocRef = doc(filialDetailsRef, `${sanitizedRota}_${chunkIndex}`);
-                                    batch.set(rotaDocRef, { filiais: chunk });
-                                    operationCount++;
-                                    commitBatchIfNeeded();
-                                }
+                                const sanitizedSectorName = setor.replace(/[.\/\[\]*$#]/g, '_');
+                                const newDocRef = doc(sectorDetailsRef, sanitizedSectorName);
+                                batch.set(newDocRef, { products: productsArray });
+                                operationCount++;
+                                commitBatchIfNeeded();
                             }
                         }
                         
+                        const filialDetailsRef = collection(db, "shared_analyses", analysisId, "filial_details");
+                        for (const [rota, filiais] of filialData.entries()) {
+                             const filiaisArray = Array.from(filiais.entries()).map(([filial, unidades]) => ({ filial, unidades }));
+                             if(filiaisArray.length > 0) {
+                                const sanitizedRota = rota.replace(/[.\/\[\]*$#]/g, '_');
+                                const newDocRef = doc(filialDetailsRef, sanitizedRota);
+                                batch.set(newDocRef, { filiais: filiaisArray });
+                                operationCount++;
+                                commitBatchIfNeeded();
+                             }
+                        }
+
+                        const { analysisData } = productAnalysis;
                         const dataChunksRef = collection(db, "shared_analyses", analysisId, "data_chunks");
                         const chunkSize = 2000;
                         for (let i = 0; i < analysisData.length; i += chunkSize) {
@@ -1520,9 +1509,10 @@
                         
                         if(operationCount > 0) allBatches.push(batch.commit());
                         await Promise.all(allBatches);
+
                         localStorage.setItem('lastSharedAnalysisId', analysisId);
                         const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
-                        showShareLinkModal(shareUrl);
+                        showShareLinkModal(shareUrl); // Esta é a chamada que estava a dar erro
                     } catch (error) {
                         console.error("Error saving analysis to Firebase:", error);
                         let errorMessage = "Erro ao guardar a análise para partilha.";
@@ -1533,6 +1523,7 @@
                         UIElements.loader.classList.add('hidden');
                     }
                 };
+                
                 if (lastId) {
                     const modal = document.getElementById('update-share-modal');
                     modal.classList.remove('hidden');
@@ -1541,6 +1532,31 @@
                 } else {
                     performShare('create_new');
                 }
+            }
+
+            // ===================================================================
+            //  NOVA FUNÇÃO ADICIONADA PARA CORRIGIR O ERRO
+            // ===================================================================
+            function showShareLinkModal(url) {
+                const modal = document.getElementById('share-link-modal');
+                const urlInput = document.getElementById('share-link-input');
+                const copyBtn = document.getElementById('copy-link-btn');
+                const originalBtnContent = copyBtn.innerHTML;
+                
+                urlInput.value = url;
+                modal.classList.remove('hidden');
+                
+                modal.querySelector('.modal-close-btn').onclick = () => modal.classList.add('hidden');
+                modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
+                
+                copyBtn.onclick = () => {
+                    urlInput.select();
+                    urlInput.setSelectionRange(0, 99999); // Para mobile
+                    navigator.clipboard.writeText(urlInput.value);
+                    showNotification('Link copiado para a área de transferência!', 'success');
+                    copyBtn.textContent = 'Copiado!';
+                    setTimeout(() => { copyBtn.innerHTML = originalBtnContent; }, 2000);
+                };
             }
 
             async function loadAnalysisFromFirebase(analysisId) {
@@ -1564,15 +1580,11 @@
 
                     const setoresData = new Map();
                     sectorSnapshot.forEach(doc => {
-                        const docId = doc.id;
-                        const baseName = docId.replace(/_\d+$/, ''); 
-                        const setor = baseName.replace(/_/g, '/');
+                        const setor = doc.id.replace(/_/g, '/');
                         const data = doc.data();
-
                         if (!setoresData.has(setor)) {
                             setoresData.set(setor, { totalQtd: 0, products: new Map(), totalLabels: 0 });
                         }
-                        
                         const setorInfo = setoresData.get(setor);
                         if (data.products && Array.isArray(data.products)) {
                             data.products.forEach(product => {
@@ -1584,15 +1596,9 @@
 
                     const filialData = new Map();
                     filialSnapshot.forEach(doc => {
-                        const docId = doc.id;
-                        const baseName = docId.replace(/_\d+$/, '');
-                        const rota = baseName.replace(/_/g, '/');
+                        const rota = doc.id.replace(/_/g, '/');
                         const data = doc.data();
-                        
-                        if (!filialData.has(rota)) {
-                            filialData.set(rota, new Map());
-                        }
-
+                        if (!filialData.has(rota)) filialData.set(rota, new Map());
                         const filiaisMap = filialData.get(rota);
                         if (data.filiais && Array.isArray(data.filiais)) {
                             data.filiais.forEach(filialInfo => filiaisMap.set(filialInfo.filial, filialInfo.unidades));
@@ -1646,7 +1652,7 @@
                     }, {});
                     displayTop20BySector(productsBySector);
                     setupProductSearch(productAnalysis.analysisData, productAnalysis.productSalesDetails);
-                   
+                    
                     showNotification('Análise partilhada carregada.', 'success');
                     if (manifestData.lastUpdateTime) updateTimestamp(manifestData.lastUpdateTime);
                     
@@ -1655,6 +1661,62 @@
                     showNotification("Erro ao carregar a análise partilhada.", "error");
                 } finally {
                     UIElements.loader.classList.add('hidden');
+                }
+            }
+
+            function exportToExcel(sheets, filename = 'relatorio.xlsx') {
+                try {
+                    const workbook = XLSX.utils.book_new();
+                    sheets.forEach(sheetInfo => {
+                        if (!sheetInfo.data || sheetInfo.data.length === 0) return;
+                        
+                        const header = Object.keys(sheetInfo.data[0]);
+                        const aoa = [header, ...sheetInfo.data.map(row => header.map(key => row[key]))];
+                        const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+
+                        const colWidths = header.map((h, i) => ({
+                            wch: Math.max(h.length, ...sheetInfo.data.map(row => String(row[h] || '').length)) + 2
+                        }));
+                        worksheet['!cols'] = colWidths;
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, sheetInfo.name);
+                    });
+
+                    if (workbook.SheetNames.length > 0) {
+                        XLSX.writeFile(workbook, filename);
+                        showNotification(`Ficheiro Excel "${filename}" descarregado!`, 'success');
+                    } else {
+                        showNotification('Nenhum dado para exportar.', 'warning');
+                    }
+                } catch (error) {
+                    console.error("Erro ao exportar para Excel:", error);
+                    showNotification('Falha ao gerar o ficheiro Excel.', 'error');
+                }
+            }
+
+            function exportToPdf(title, head, body, filename) {
+                try {
+                    showNotification('A gerar PDF...', 'warning', 2000);
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+                    doc.setFontSize(18);
+                    doc.setTextColor('#343a40');
+                    doc.text(title, 14, 22);
+
+                    doc.autoTable({
+                        head: [head],
+                        body: body,
+                        startY: 35,
+                        theme: 'grid',
+                        headStyles: { fillColor: [111, 66, 193] },
+                    });
+
+                    doc.save(filename);
+                    showNotification(`Ficheiro PDF "${filename}" descarregado!`, 'success');
+                } catch(error) {
+                        console.error("Erro ao gerar PDF:", error);
+                        showNotification('Falha ao gerar o ficheiro PDF.', 'error');
                 }
             }
             
@@ -1744,4 +1806,3 @@
     </script>
 </body>
 </html>
-
