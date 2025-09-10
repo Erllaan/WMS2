@@ -1116,7 +1116,8 @@
                 const sortedSetoresForLabels = [...setoresData.entries()].sort((a, b) => getOrder(a[0]) - getOrder(b[0]) || a[0].localeCompare(b[0]));
                 const labelSectorsData = sortedSetoresForLabels.filter(([setor]) => labelSectors.has(setor.toUpperCase()));
                 if (labelSectorsData.length > 0) {
-                    if (appState.productMasterData.size === 0) {
+                    // CORREÇÃO: Apenas verificar o tamanho do productMasterData se NÃO for uma visualização partilhada
+                    if (appState.productMasterData.size === 0 && !isReadOnlySharedView) {
                         labelContainer.innerHTML = `<h2>Estimativa de Etiquetas por Setor (QMS)</h2><div class="placeholder-card"><p>Carregue a planilha de <strong>Cadastro de Produtos (QMS)</strong> para ver a estimativa de etiquetas.</p></div>`;
                     } else {
                         const labelTableRows = labelSectorsData.map(([setor, data]) => `<tr><td class="col-setor">${setor}</td><td class="col-etiquetas">${formatNumber(data.totalLabels)}</td></tr>`).join('');
@@ -1405,9 +1406,6 @@
                 }
             }
             
-            // ===================================================================
-            //  FUNÇÃO CORRIGIDA - INÍCIO
-            // ===================================================================
             async function saveAnalysisToFirebase() {
                 if (!db || !auth.currentUser) {
                     showNotification("Serviço de partilha indisponível ou utilizador não autenticado.", "error");
@@ -1512,7 +1510,7 @@
 
                         localStorage.setItem('lastSharedAnalysisId', analysisId);
                         const shareUrl = `${window.location.origin}${window.location.pathname}?analysis=${analysisId}`;
-                        showShareLinkModal(shareUrl); // Esta é a chamada que estava a dar erro
+                        showShareLinkModal(shareUrl);
                     } catch (error) {
                         console.error("Error saving analysis to Firebase:", error);
                         let errorMessage = "Erro ao guardar a análise para partilha.";
@@ -1533,10 +1531,7 @@
                     performShare('create_new');
                 }
             }
-
-            // ===================================================================
-            //  NOVA FUNÇÃO ADICIONADA PARA CORRIGIR O ERRO
-            // ===================================================================
+            
             function showShareLinkModal(url) {
                 const modal = document.getElementById('share-link-modal');
                 const urlInput = document.getElementById('share-link-input');
@@ -1551,7 +1546,7 @@
                 
                 copyBtn.onclick = () => {
                     urlInput.select();
-                    urlInput.setSelectionRange(0, 99999); // Para mobile
+                    urlInput.setSelectionRange(0, 99999);
                     navigator.clipboard.writeText(urlInput.value);
                     showNotification('Link copiado para a área de transferência!', 'success');
                     copyBtn.textContent = 'Copiado!';
@@ -1806,3 +1801,4 @@
     </script>
 </body>
 </html>
+
